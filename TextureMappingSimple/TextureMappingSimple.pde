@@ -162,7 +162,7 @@ void mousePressed()
     }
     else
     {
-      println("mx" + (mouseX-currentShape.myImage.width));
+      //println("mx" + (mouseX-currentShape.myImage.width));
 
       //DEST
       currentVert = currentShape.getClosestVertexToDest(mouseX-currentShape.myImage.width, mouseY, distanceSquared);
@@ -211,10 +211,8 @@ void mouseDragged()
       break;
 
 
-
     case SHOW_BOTH:
 
-      // TODO!!!
       if (mouseX < currentShape.myImage.width)
       {
         currentVert.src.x = mouseX;
@@ -222,6 +220,7 @@ void mouseDragged()
       } 
       else 
       {
+        println("move dest");
         currentVert.dest.x = mouseX-currentShape.myImage.width;
         currentVert.dest.y = mouseY;
       }

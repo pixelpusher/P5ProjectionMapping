@@ -166,7 +166,9 @@ class ProjectedShape
     // draw the shape using source and destination vertices
     if (verts != null && verts.size() > 1)
     {
-      PVector p = new PVector (x, y);
+      PVector ps = new PVector (x, y);
+      PVector pd = new PVector (x, y);
+      
       ListIterator<ProjectedShapeVertex> iter = verts.listIterator();
 
       int i=0;
@@ -188,16 +190,16 @@ class ProjectedShape
 
           //println(" vert2 " + vert2);
 
-          float d = distancePointToLine(vert1.src, vert2.src, p);
+          float d = distancePointToLine(vert1.src, vert2.src, ps);
 
           println("d:" + d);
 
           if ( d < distanceSquared)
           {
-            println("add a point["+ iter.previousIndex() +"] " + p.x + "," + p.y);
+            //println("add a point["+ iter.previousIndex() +"] " + ps.x + "," + ps.y);
             // add a new point!
             iter.previous();
-            result = new ProjectedShapeVertex(p, p); 
+            result = new ProjectedShapeVertex(ps, pd); 
             iter.add( result );
           }
         }
@@ -209,14 +211,14 @@ class ProjectedShape
         vert2 = verts.peekLast();
         vert1 = verts.peekFirst();
 
-        float d = distancePointToLine(vert1.src, vert2.src, p);
+        float d = distancePointToLine(vert1.src, vert2.src, ps);
 
         println("d:" + d);
 
         if ( d < distanceSquared)
         {
           // add a new point!
-          result = new ProjectedShapeVertex(p, p); 
+          result = new ProjectedShapeVertex(ps, pd); 
           verts.addLast( result );
         }
       }
@@ -236,7 +238,9 @@ class ProjectedShape
     // draw the shape using source and destination vertices
     if (verts != null && verts.size() > 1)
     {
-      PVector p = new PVector (x, y);
+      PVector ps = new PVector (x, y);
+      PVector pd = new PVector (x, y);
+      
       ListIterator<ProjectedShapeVertex> iter = verts.listIterator();
 
       int i=0;
@@ -258,16 +262,16 @@ class ProjectedShape
 
           //println(" vert2 " + vert2);
 
-          float d = distancePointToLine(vert1.dest, vert2.dest, p);
+          float d = distancePointToLine(vert1.dest, vert2.dest, ps);
 
-          println("d:" + d);
+          //println("d:" + d);
 
           if ( d < distanceSquared)
           {
             //println("add a point["+ iter.previousIndex() +"] " + p.x + "," + p.y);
             // add a new point!
             iter.previous();
-            result = new ProjectedShapeVertex(p, p); 
+            result = new ProjectedShapeVertex(ps, pd); 
             iter.add( result );
           }
         }
@@ -279,14 +283,14 @@ class ProjectedShape
         vert2 = verts.peekLast();
         vert1 = verts.peekFirst();
 
-        float d = distancePointToLine(vert1.dest, vert2.dest, p);
+        float d = distancePointToLine(vert1.dest, vert2.dest, ps);
 
         println("d:" + d);
 
         if ( d < distanceSquared)
         {
           // add a new point!
-          result = new ProjectedShapeVertex(p, p); 
+          result = new ProjectedShapeVertex(ps, pd); 
           verts.addLast( result );
         }
       }
