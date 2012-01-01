@@ -4,6 +4,9 @@
  * and a destination set of points (forming a polgon) that
  * the image should be mapped to.
  *
+ * TODO: make ProjectedShape into an interface, then subclass it to 
+ *       ProjectedVectorShape and ProjectedImageShape
+ *
  *
  */
 
