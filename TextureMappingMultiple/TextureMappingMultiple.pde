@@ -1,24 +1,27 @@
-import processing.opengl.*;
-
 /*
  * First go at Projection mapping in Processing
+ * Uses a list of projection-mapped shapes
  *
  * by Evan Raskob
  * 
  * keys:
  *
  *  d: delete currently selected shape vertex
+ *  a: add a new shape
+ *  x: delete current shape
+ *  <: prev shape
+ *  >: next shape
  *  SPACEBAR: clear current shape
  *  i: toggle drawing source image
  *  m: next display mode ( SHOW_SOURCE, SHOW_MAPPED, SHOW_BOTH)
  *  s: sync vertices to source for current shape
- *  d: sync vertices to destination for current shape
+ *  t: sync vertices to destination for current shape
  *
  */
- 
- 
 
 
+
+LinkedList<ProjectedShape> shapes = null; // list of points in the image (PVectors)
 
 ProjectedShapeVertex currentVert = null; // reference to the currently selected vert
 
@@ -28,21 +31,23 @@ float maxDistToVert = 10;  //max distance between mouse and a vertex for moving
 
 ProjectedShape currentShape = null;
 
-PImage sourceImage;
+HashMap<String, PImage> sourceImages;  // list of images, keyed by file name
 
 final int SHOW_SOURCE = 0;
 final int SHOW_MAPPED = 1;
 final int SHOW_BOTH = 2;
 
-int displayMode = SHOW_BOTH;  
-
 boolean hitSrcShape = false;
 boolean hitDestShape = false;
 
-boolean drawImage = true;
+int displayMode = SHOW_BOTH;  
 
 final float distance = 15;
 final float distanceSquared = distance*distance;  // in pixels, for selecting verts
+
+
+boolean drawImage = true;
+
 
 // 
 // setup
@@ -53,14 +58,77 @@ void setup()
   // set size and renderer
   size(640, 480, OPENGL);
 
-  // load my image
-  sourceImage = loadImage("7sac9xt9.bmp");
-
-  currentShape = new ProjectedShape( sourceImage );
   shapeRenderer = new ProjectedShapeRenderer(); 
-  
-  frame.setResizable(true);
-  
+  shapes = new LinkedList<ProjectedShape>();
+  sourceImages = new HashMap<String, PImage>(); 
+
+  // load my image
+  PImage sourceImage = loadImageIfNecessary("7sac9xt9.bmp");
+
+  // to do - check for bad image data!
+  addNewShape(sourceImage);
+}
+
+
+
+void addNewShape(PImage sourceImage)
+{
+  // this will hold out drawing's vertices
+  currentShape = new ProjectedShape( sourceImage );
+  shapes.add ( currentShape );
+}
+
+void deleteShape( ProjectedShape s)
+{
+  if (currentShape == s) currentShape = null;
+  shapes.remove( s );
+}
+
+
+
+void printLoadedFiles()
+{
+  println("Printing loaded images:");
+  println();
+
+  Set<String> keys = sourceImages.keySet();
+  for (String k : keys)
+  {
+    println(k);
+  }
+}
+
+
+// 
+// this is dangerous because it doesn't check if it's still in use.
+// but doing so would require wrapping the PImage object in a subclass
+// that counts usage, and that adds too much complexity (for now)
+//
+void unloadImage( String location )
+{
+  sourceImages.remove( location );
+}
+
+
+PImage loadImageIfNecessary(String location)
+{
+  String _location = "";
+
+  File f = new File(location);
+  _location = f.getName();
+
+  PImage loadedImage = null;
+
+  if ( sourceImages.containsKey( _location ) )
+  {
+    loadedImage = sourceImages.get( _location );
+  }
+  else
+  {
+    loadedImage = loadImage( _location );
+  }
+
+  return loadedImage;
 }
 
 
@@ -73,49 +141,46 @@ void draw()
   // white background
   background(255);
 
-  if (drawImage)
-    image( sourceImage, 0, 0);
 
-  switch( displayMode )
+  fill(255, 20);
+  stroke(255, 0, 255);
+
+  for (ProjectedShape projShape : shapes)
   {
-  case SHOW_SOURCE:
-    fill(255, 20);
-    shapeRenderer.drawSourceShape(currentShape);
-    break;
+    if ( projShape != currentShape)
+    {
+      pushMatrix();
+      translate(projShape.srcImage.width, 0);
 
+      noStroke();
+      shapeRenderer.draw(projShape);
+      popMatrix();
+    }
+  }
 
-  case SHOW_MAPPED:
-    fill(255, 20);
-    stroke(255,0,255);
-    shapeRenderer.draw(currentShape);
-    break;
-
-
-
-  case SHOW_BOTH:
+ // draw shape we're editing currently
+ //
+  if (drawImage)
+    image( currentShape.srcImage, 0, 0);
 
     fill(255, 20);
     shapeRenderer.drawSourceShape(currentShape);
 
     pushMatrix();
     translate(currentShape.srcImage.width, 0);
-    
+
     noStroke();
     shapeRenderer.draw(currentShape);
-    
+
     shapeRenderer.drawDestShape(currentShape);
     popMatrix();
-
-
-    break;
-  }
 }
 
 
 
 void mousePressed()
 {
-  hitSrcShape = hitDestShape = false;  
+  hitSrcShape = false;  
   
   switch( displayMode )
   {
@@ -271,6 +336,7 @@ void mouseDragged()
 
 
 
+
 void keyPressed()
 {
 }
@@ -281,13 +347,16 @@ void keyReleased()
   {
     currentShape.syncVertsToSource();
   }
-  else if (key == 'd' || key =='D' && currentShape != null)
+  else if (key == 't' || key =='T' && currentShape != null)
   {
-     currentShape.syncVertsToDest();
+    currentShape.syncVertsToDest();
+  }
+  else if (key=='a')
+  {
+    addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
   }
   else if (key == 'd' && currentVert != null)
   {
-
     currentShape.removeVert(currentVert);
     currentVert = null;
   }
