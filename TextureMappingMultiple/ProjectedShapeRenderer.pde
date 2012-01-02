@@ -36,6 +36,7 @@ final class ProjectedShapeRenderer
   
   final void drawSourceShape(final ProjectedShape projShape, PGraphics renderTarget)
   {
+    renderTarget.smooth();
     renderTarget.strokeWeight(2);
     renderTarget.stroke(0, 255, 0, 80);
     // draw the shape using source and destination vertices
@@ -71,6 +72,7 @@ final class ProjectedShapeRenderer
 
   final void drawDestShape(final ProjectedShape projShape, PGraphics renderTarget)
   {
+    renderTarget.smooth();
     renderTarget.strokeWeight(2);
     renderTarget.stroke(255, 0, 255,80);
 
@@ -110,6 +112,7 @@ final class ProjectedShapeRenderer
     if (projShape.verts != null && projShape.verts.size() > 0)
     {
       renderTarget.noStroke();
+      renderTarget.noSmooth();
       renderTarget.beginShape();
       renderTarget.texture( projShape.srcImage );
       for (ProjectedShapeVertex vert : projShape.verts)

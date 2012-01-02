@@ -64,10 +64,10 @@ public class DynamicGraphic extends PGraphics3D
   DynamicGraphic(PApplet app, int iwidth, int iheight)
   {
     super();
-    setParent(app);
-    setPrimary(false);
+    this.setParent(app);
+    this.setPrimary(false);
     //setAntiAlias(true);
-    setSize(iwidth, iheight);
+    this.setSize(iwidth, iheight);
 
     // this attaches itself automagically to run the preDraw() method when the main
     // Processing app does

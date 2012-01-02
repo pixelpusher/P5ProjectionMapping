@@ -212,8 +212,10 @@ void draw()
  // draw shape we're editing currently
  //
   if (drawImage)
+  {
+    noSmooth();  // otherwise we see white lines!
     image( currentShape.srcImage, 0, 0);
-
+  }
     fill(255, 20);
     shapeRenderer.drawSourceShape(currentShape);
 
