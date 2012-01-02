@@ -64,25 +64,43 @@ boolean isInsideShape(ProjectedShape projShape, float x, float y, boolean testSo
     PVector v2 = v1;
     float xinters;
 
+    boolean finished = false;
+
     // make sure we're not at the last element
-    while (iter.hasNext() )
+    while (!finished )
     {
       ++i;
 
       v1 = v2;
-      v2 = testSource ? iter.next().src : iter.next().dest;
-
-      //if ray is outside of our interests
-      if (p.y < min(v1.y, v2.y) || p.y > max(v1.y, v2.y))
+      
+      if (iter.hasNext())
       {
+        v2 = testSource ? iter.next().src : iter.next().dest;
+      }
+      else
+      {
+        finished = true;
+        // rewind to 1st element
+        iter = projShape.verts.listIterator();
+        v2 = testSource ? iter.next().src : iter.next().dest;
+      }
+      
+      //if ray is outside of our interests
+      if ( (p.y < min(v1.y, v2.y)) || (p.y > max(v1.y, v2.y)) )
+      {
+        //println("out of hounds");
         continue;
       }
 
       //x is before ray
-      if (p.x <= max(v1.x, v2.x))
+      if (p.x <= max(v1.x, v2.x) )
       {
         //overlies on a horizontal ray
-        if (v1.y == v2.y && p.x >= min(v1.x, v2.x)) return bound;
+        if (v1.y == v2.y && p.x >= min(v1.x, v2.x))
+        {
+          //println("horizontal");
+          return bound;
+        }
 
         //ray is vertical
         if (v1.x == v2.x)
@@ -91,7 +109,11 @@ boolean isInsideShape(ProjectedShape projShape, float x, float y, boolean testSo
           if (v1.x == p.x) return bound;
 
           //before ray
-          else ++intersections;
+          else 
+          {
+            //println("before");
+            ++intersections;
+          }
         }
 
         //cross point on the left side
@@ -100,11 +122,21 @@ boolean isInsideShape(ProjectedShape projShape, float x, float y, boolean testSo
           //cross point of x
           xinters = (p.y - v1.y) * (v2.x - v1.x) / (v2.y - v1.y) + v1.x;
 
+          println("xinters: " + p.x + " / " + xinters);
+
           //overlies on a ray
-          if (abs(p.x - xinters) < EPSILON) return bound;
+          if (abs(p.x - xinters) < EPSILON) 
+          {
+            //println("EPSILON bound");
+            return bound;
+          }
 
           //before ray
-          if (p.x < xinters) ++intersections;
+          if (p.x < xinters)
+          {
+            //println("INERSECTED: " + p.x + " / " + xinters);
+            ++intersections;
+          }
         }
       }
 
@@ -121,6 +153,7 @@ boolean isInsideShape(ProjectedShape projShape, float x, float y, boolean testSo
           //p.y lies between p1.y & p3.y
           if (p.y >= min(v1.y, v3.y) && p.y <= max(v1.y, v3.y))
           {
+            println("v3");
             ++intersections;
           }
           else
@@ -132,10 +165,12 @@ boolean isInsideShape(ProjectedShape projShape, float x, float y, boolean testSo
           v2 = v3;
         }
       }
-     
-    // done while loop  
+
+      // done while loop
     }
   }
+
+  // println("intersections:" + intersections); 
 
   //EVEN
   if (intersections % 2 == 0) return false;
