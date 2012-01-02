@@ -51,8 +51,8 @@ public class DynamicGraphic extends PGraphics3D
 
   static final String NAME = "whitney";
 
-  int   nbrPoints = 400;
-  int   cx, cy;
+  float   nbrPoints = 400;
+  float   cx, cy;
   float crad;
   float cycleLength;
   float startTime;
@@ -86,16 +86,16 @@ public class DynamicGraphic extends PGraphics3D
       sourceImages.put( NAME, this );
       
       
-      nbrPoints = 400;
+      nbrPoints = 600;
       counter =0 ;
-      speed = 1;
+      speed = 4;
       classicStyle = false;
 
       this.beginDraw();
       cx = this.width/2;
       cy = this.height/2;
       crad = (min(this.width, this.height)/2) * 0.95;
-      this.noStroke();
+     // this.noStroke();
       this.smooth();
       this.colorMode(HSB, 1);
 
@@ -105,7 +105,8 @@ public class DynamicGraphic extends PGraphics3D
         cycleLength = 15*60;
       else
         cycleLength = 2000*15*60;
-      speed = (2*PI*nbrPoints) / cycleLength;
+        
+      speed = (TWO_PI*nbrPoints) / cycleLength;
       startTime = -random(cycleLength);
       // speed = 10;
       this.endDraw();
@@ -122,32 +123,44 @@ public class DynamicGraphic extends PGraphics3D
       this.beginDraw();
       this.smooth();
       this.colorMode(HSB, 1);
+      this.strokeWeight(2);
+      
       startTime = -(cycleLength*20) / (float) this.height;
       float timer = (millis()*.001 - startTime)*speed;
 
       this.background(0);
       counter = int(timer / cycleLength);
 
-      for (int i = 0; i < nbrPoints; ++i)
+      this.beginShape();
+      this.noFill();
+      
+      //this.noStroke();
+      for (float i = 0; i < nbrPoints; ++i)
       {
-
-        float r = i/(float)nbrPoints;
+        float r = i/(nbrPoints-1f);
+        float len = crad*r;
+        
         if ((counter & 1) == 0)
           r = 1-r;
-
+          
         float a = timer * r; // pow(i * .001,2);
         // float a = timer*2*PI/(cycleLength/i); same thing
-        float len = i*crad/(float)nbrPoints;
+       
         float rad = max(2, len*.05);
         if (!classicStyle)
           len *= sin(a*timer);  // big fun!
-        int x = (int) (cx + cos(a)*len);
-        int y = (int) (cy + sin(a)*len);
+        float x = (cx + cos(a)*len);
+        float y = (cy + sin(a)*len);
         float h = r + timer * .01;
         h -= int(h);
-        this.fill(h, .5, 1-r/2);
-        this.ellipse(x, y, rad, rad);
+        
+        //this.fill(h, .9, 1-r/2);
+        this.stroke(h, .8, 1-r/2);        
+        this.curveVertex(x, y);
+        
+        //this.ellipse(x, y, rad, rad);
       }
+      this.endShape();
       this.endDraw();
     }
   }
