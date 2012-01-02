@@ -67,6 +67,7 @@ void setup()
   PImage sourceImage = loadImageIfNecessary("7sac9xt9.bmp");
   dynamicImage = createGraphics(256,256,OPENGL); 
   setupDynamicImage(dynamicImage);
+  sourceImages.put( "whitneydynamic", dynamicImage );
 
   // to do - check for bad image data!
   addNewShape(dynamicImage);
@@ -129,6 +130,7 @@ PImage loadImageIfNecessary(String location)
   else
   {
     loadedImage = loadImage( _location );
+    sourceImages.put( _location, loadedImage );
   }
 
   return loadedImage;

@@ -32,6 +32,9 @@ float maxDistToVert = 10;  //max distance between mouse and a vertex for moving
 ProjectedShape currentShape = null;
 
 HashMap<String, PImage> sourceImages;  // list of images, keyed by file name
+HashMap<ProjectedShape, Movie> sourceMovies;  // list of movies, keyed by associated object that is using them
+HashMap<String, PGraphics> sourceDynamic;  // list of dynamic images (PGraphics), keyed by name
+
 
 final int SHOW_SOURCE = 0;
 final int SHOW_MAPPED = 1;
@@ -61,21 +64,58 @@ void setup()
   shapeRenderer = new ProjectedShapeRenderer(); 
   shapes = new LinkedList<ProjectedShape>();
   sourceImages = new HashMap<String, PImage>(); 
+  sourceMovies = new HashMap<ProjectedShape();
+  sourceDynamic = new HashMap<String, PGraphics>();
 
   // load my image
   PImage sourceImage = loadImageIfNecessary("7sac9xt9.bmp");
 
   // to do - check for bad image data!
   addNewShape(sourceImage);
+  
+  // dynamic graphics
+  setupDynamicImages();
+  
+}
+
+
+// cleanup
+
+void resetAllData()
+{
+  // clear all shape refs
+  for (ProjectedShape projShape : shapes)
+  {
+    projShape.clear();
+  }
+  shapes.clear();
+  sourceImages.clear();
+  
+  shapes = new LinkedList<ProjectedShape>();
+  
+  // TODO: better way to unload these?
+  sourceImages = new HashMap<String, PImage>(); 
+  sourceMovies = new HashMap<ProjectedShape();
+  
+  // probably don't want to reset dynamic images because there is no way to recreate them!
+  //sourceDynamic = new HashMap<String, PGraphics>();
+  // TODO: then re-add them to list of sourceImages
+  for (String k : sourceDynamic.keySet())
+  {
+    PGraphics pg = sourceDynamic.get(k);
+    sourceImage.put(k, pg);
+  }
 }
 
 
 
-void addNewShape(PImage sourceImage)
+ProjectedShape addNewShape(PImage sourceImage)
 {
   // this will hold out drawing's vertices
   currentShape = new ProjectedShape( sourceImage );
   shapes.add ( currentShape );
+  
+  return currentShape;
 }
 
 void deleteShape( ProjectedShape s)
@@ -126,6 +166,7 @@ PImage loadImageIfNecessary(String location)
   else
   {
     loadedImage = loadImage( _location );
+    sourceImages.put( _location, loadedImage );
   }
 
   return loadedImage;
@@ -138,6 +179,14 @@ PImage loadImageIfNecessary(String location)
 
 void draw()
 {
+  // update all dynamic images
+  // BAD BAD BAD
+  for (PGraphics dynamicImage : sourceDynamic.values())
+  {
+    drawWhitneyDynamicImage(dynamicImage);
+  }
+  
+  
   // white background
   background(255);
 

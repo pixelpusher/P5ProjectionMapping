@@ -11,6 +11,8 @@ class ProjectedShape
 {
   PImage srcImage = null;
 
+  String name = null;
+
   LinkedList<ProjectedShapeVertex> verts = null; // list of points in the image (PVectors)
 
   ProjectedShape(PImage img)
@@ -20,6 +22,9 @@ class ProjectedShape
     else
       println("ERROR::::IMAGE FOR PROJECTED SHAPE CANNOT BE NULL!!");
     verts    = new LinkedList<ProjectedShapeVertex>();
+    
+    // give it a random name
+    name = "shape" + random(0,MAX_INT);
   }
 
 
@@ -45,6 +50,8 @@ class ProjectedShape
 
   void clear()
   {
+    srcImage = null;
+    
     for (ProjectedShapeVertex v : verts)
       v.clear();
 
