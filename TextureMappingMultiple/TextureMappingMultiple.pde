@@ -1,6 +1,10 @@
+import processing.video.*;
+
+
 /*
  * First go at Projection mapping in Processing
- * Uses a list of projection-mapped shapes
+ * Uses a list of projection-mapped shapes.
+ * Only really works in Processing 2.0a4 or newer. 
  *
  * by Evan Raskob
  * 
@@ -17,6 +21,8 @@
  *  s: sync vertices to source for current shape
  *  t: sync vertices to destination for current shape
  *
+ *
+ * TODO: reordering of shape layers
  */
 
 
@@ -33,7 +39,7 @@ ProjectedShape currentShape = null;
 
 HashMap<String, PImage> sourceImages;  // list of images, keyed by file name
 HashMap<ProjectedShape, Movie> sourceMovies;  // list of movies, keyed by associated object that is using them
-HashMap<String, PGraphics> sourceDynamic;  // list of dynamic images (PGraphics), keyed by name
+HashMap<String, DynamicGraphic> sourceDynamic;  // list of dynamic images (subclass of PGraphics), keyed by name
 
 
 final int SHOW_SOURCE = 0;
@@ -59,13 +65,13 @@ boolean drawImage = true;
 void setup()
 {
   // set size and renderer
-  size(640, 480, OPENGL);
+  size(640, 480, P3D);
 
   shapeRenderer = new ProjectedShapeRenderer(); 
   shapes = new LinkedList<ProjectedShape>();
   sourceImages = new HashMap<String, PImage>(); 
-  sourceMovies = new HashMap<ProjectedShape();
-  sourceDynamic = new HashMap<String, PGraphics>();
+  //sourceMovies = new HashMap<ProjectedShape,Movie>();
+  sourceDynamic = new HashMap<String, DynamicGraphic>();
 
   // load my image
   PImage sourceImage = loadImageIfNecessary("7sac9xt9.bmp");
@@ -95,22 +101,26 @@ void resetAllData()
   
   // TODO: better way to unload these?
   sourceImages = new HashMap<String, PImage>(); 
-  sourceMovies = new HashMap<ProjectedShape();
+  sourceMovies = new HashMap<ProjectedShape, Movie>();
   
   // probably don't want to reset dynamic images because there is no way to recreate them!
   //sourceDynamic = new HashMap<String, PGraphics>();
   // TODO: then re-add them to list of sourceImages
+  
   for (String k : sourceDynamic.keySet())
   {
     PGraphics pg = sourceDynamic.get(k);
-    sourceImage.put(k, pg);
+    sourceImages.put(k, pg);
   }
+  
 }
 
 
 
 ProjectedShape addNewShape(PImage sourceImage)
 {
+  println("ADDING SHAPE " + sourceImage);
+  
   // this will hold out drawing's vertices
   currentShape = new ProjectedShape( sourceImage );
   shapes.add ( currentShape );
@@ -179,14 +189,6 @@ PImage loadImageIfNecessary(String location)
 
 void draw()
 {
-  // update all dynamic images
-  // BAD BAD BAD
-  for (PGraphics dynamicImage : sourceDynamic.values())
-  {
-    drawWhitneyDynamicImage(dynamicImage);
-  }
-  
-  
   // white background
   background(255);
 
@@ -223,6 +225,7 @@ void draw()
 
     shapeRenderer.drawDestShape(currentShape);
     popMatrix();
+    
 }
 
 
@@ -402,7 +405,8 @@ void keyReleased()
   }
   else if (key=='a')
   {
-    addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
+    //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
+    addNewShape(sourceDynamic.get( DynamicGraphic.NAME ) );
   }
   else if (key == 'd' && currentVert != null)
   {

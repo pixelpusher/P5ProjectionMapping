@@ -109,6 +109,7 @@ final class ProjectedShapeRenderer
     //  the shape using source and destination vertices
     if (projShape.verts != null && projShape.verts.size() > 0)
     {
+      renderTarget.noStroke();
       renderTarget.beginShape();
       renderTarget.texture( projShape.srcImage );
       for (ProjectedShapeVertex vert : projShape.verts)
