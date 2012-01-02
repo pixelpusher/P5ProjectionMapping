@@ -52,12 +52,16 @@ class ProjectedShape
   {
     srcImage = null;
     
+    clearVerts();
+  }
+
+void clearVerts()
+  {    
     for (ProjectedShapeVertex v : verts)
       v.clear();
 
     verts.clear();
   }
-
 
   // sync all the projected vertices to the source verts
   void syncVertsToSource()

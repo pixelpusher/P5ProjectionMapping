@@ -293,7 +293,7 @@ void keyReleased()
   }
   else if (key == ' ') 
   {
-    currentShape.clear();
+    currentShape.clearVerts();
     currentVert = null;
   }
   else if (key == 'i') 

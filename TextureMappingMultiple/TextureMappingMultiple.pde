@@ -48,6 +48,7 @@ final int SHOW_BOTH = 2;
 
 boolean hitSrcShape = false;
 boolean hitDestShape = false;
+boolean showFPS = true;
 
 int displayMode = SHOW_BOTH;  
 
@@ -56,7 +57,7 @@ final float distanceSquared = distance*distance;  // in pixels, for selecting ve
 
 
 boolean drawImage = true;
-
+PFont calibri;
 
 // 
 // setup
@@ -66,6 +67,14 @@ void setup()
 {
   // set size and renderer
   size(640, 480, P3D);
+  
+  //calibri = loadFont("Calibri-14.vlw");
+  
+  String[] fonts = PFont.list();
+  PFont font = createFont(fonts[0], 11);
+  textFont(font,16);
+  
+  //textFont(calibri,12);
 
   shapeRenderer = new ProjectedShapeRenderer(); 
   shapes = new LinkedList<ProjectedShape>();
@@ -78,10 +87,9 @@ void setup()
 
   // to do - check for bad image data!
   addNewShape(sourceImage);
-  
+
   // dynamic graphics
   setupDynamicImages();
-  
 }
 
 
@@ -96,23 +104,22 @@ void resetAllData()
   }
   shapes.clear();
   sourceImages.clear();
-  
+
   shapes = new LinkedList<ProjectedShape>();
-  
+
   // TODO: better way to unload these?
   sourceImages = new HashMap<String, PImage>(); 
   sourceMovies = new HashMap<ProjectedShape, Movie>();
-  
+
   // probably don't want to reset dynamic images because there is no way to recreate them!
   //sourceDynamic = new HashMap<String, PGraphics>();
   // TODO: then re-add them to list of sourceImages
-  
+
   for (String k : sourceDynamic.keySet())
   {
     PGraphics pg = sourceDynamic.get(k);
     sourceImages.put(k, pg);
   }
-  
 }
 
 
@@ -120,11 +127,11 @@ void resetAllData()
 ProjectedShape addNewShape(PImage sourceImage)
 {
   println("ADDING SHAPE " + sourceImage);
-  
+
   // this will hold out drawing's vertices
   currentShape = new ProjectedShape( sourceImage );
   shapes.add ( currentShape );
-  
+
   return currentShape;
 }
 
@@ -190,7 +197,7 @@ PImage loadImageIfNecessary(String location)
 void draw()
 {
   // white background
-  background(255);
+  background(0);
 
 
   fill(255, 20);
@@ -209,25 +216,32 @@ void draw()
     }
   }
 
- // draw shape we're editing currently
- //
+  // draw shape we're editing currently
+  //
   if (drawImage)
   {
     noSmooth();  // otherwise we see white lines!
     image( currentShape.srcImage, 0, 0);
   }
-    fill(255, 20);
-    shapeRenderer.drawSourceShape(currentShape);
+  fill(255, 20);
+  shapeRenderer.drawSourceShape(currentShape);
 
-    pushMatrix();
-    translate(currentShape.srcImage.width, 0);
+  pushMatrix();
+  translate(currentShape.srcImage.width, 0);
 
-    noStroke();
-    shapeRenderer.draw(currentShape);
+  noStroke();
+  shapeRenderer.draw(currentShape);
 
-    shapeRenderer.drawDestShape(currentShape);
-    popMatrix();
-    
+  shapeRenderer.drawDestShape(currentShape);
+  popMatrix();
+  
+  
+  if (showFPS)
+  {
+    fill(255);
+    text("fps: " + nfs(frameRate,3,2), 4,height-18);
+  }
+  
 }
 
 
@@ -235,7 +249,7 @@ void draw()
 void mousePressed()
 {
   hitSrcShape = false;  
-  
+
   switch( displayMode )
   {
   case SHOW_SOURCE:
@@ -288,13 +302,13 @@ void mousePressed()
 
       if (currentVert ==  null)
       {   
-   
-         if (isInsideShape(currentShape, mouseX, mouseY, true))
-         {
-           hitSrcShape = true;
-           println("inside src shape[" + mouseX +","+mouseY+"]");
-         }
-         else
+
+        if (isInsideShape(currentShape, mouseX, mouseY, true))
+        {
+          hitSrcShape = true;
+          println("inside src shape[" + mouseX +","+mouseY+"]");
+        }
+        else
           currentVert = currentShape.addVert( mouseX, mouseY, mouseX, mouseY );
       }
     }
@@ -313,15 +327,15 @@ void mousePressed()
       if (currentVert ==  null)
       {
         if (isInsideShape(currentShape, mouseX-currentShape.srcImage.width, mouseY, false))
-         {
-           hitDestShape = true;
-           println("inside dest shape[" + mouseX +","+mouseY+"]");
-         }
-         else
-         {
+        {
+          hitDestShape = true;
+          println("inside dest shape[" + mouseX +","+mouseY+"]");
+        }
+        else
+        {
           currentVert = currentShape.addVert( mouseX-currentShape.srcImage.width, mouseY, 
-            mouseX-currentShape.srcImage.width, mouseY );
-         }
+          mouseX-currentShape.srcImage.width, mouseY );
+        }
       }
     }
     break;
@@ -334,7 +348,7 @@ void mouseReleased()
 {
   // Now we know no vertex is pressed, so stop tracking the current one
   currentVert = null;
-  
+
   hitSrcShape = hitDestShape = false;
 }
 
@@ -377,15 +391,15 @@ void mouseDragged()
     }
   }
   else
-  if (hitSrcShape)
-  {
+    if (hitSrcShape)
+    {
       currentShape.move(mouseX-pmouseX, mouseY-pmouseY, true);
-  }
-  else
-  if (hitDestShape)
-  {
-      currentShape.move(mouseX-pmouseX, mouseY-pmouseY, false);
-  }
+    }
+    else
+      if (hitDestShape)
+      {
+        currentShape.move(mouseX-pmouseX, mouseY-pmouseY, false);
+      }
 }
 
 
@@ -410,6 +424,75 @@ void keyReleased()
     //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
     addNewShape(sourceDynamic.get( DynamicGraphic.NAME ) );
   }
+
+  else if (key == '<')
+  {
+    // back up 1
+
+    if (currentShape == null)
+    {
+      // may as well use the 1st
+      currentShape = shapes.getFirst();
+    }
+    else
+    {
+      ListIterator<ProjectedShape> iter = shapes.listIterator();
+      ProjectedShape prev = shapes.getLast();
+      ProjectedShape nxt = prev;
+
+      while (iter.hasNext () && currentShape != (nxt = iter.next()) )
+      {
+        prev = nxt;
+      }
+      currentShape = prev;
+    }
+  }
+
+  else if (key == '>')
+  {
+    // back up 1
+
+    if (currentShape == null)
+    {
+      // may as well use the 1st
+      currentShape = shapes.getFirst();
+    }
+    else
+    {
+      ListIterator<ProjectedShape> iter = shapes.listIterator();
+      ProjectedShape nxt = shapes.getLast();
+
+      while (iter.hasNext () && currentShape != (nxt = iter.next()) );
+
+      if ( iter.hasNext() )
+        currentShape = iter.next();
+      else
+        currentShape = shapes.getFirst();
+    }
+  }
+
+
+  else if (key == '.')
+  {
+    // advance 1 image
+/*
+    if (currentShape != null)
+    {
+      Set<String> keys = sourceImages.keySet();
+      
+      ListIterator<String> iter = keys.listIterator();
+      String prev = shapes.getLast();
+
+      while (iter.hasNext () && currentShape != (nxt = iter.next()) );
+
+      if ( iter.hasNext() )
+        currentShape = iter.next();
+      else
+        currentShape = shapes.getFirst();
+    }
+*/
+  }
+
   else if (key == 'd' && currentVert != null)
   {
     currentShape.removeVert(currentVert);
@@ -417,7 +500,7 @@ void keyReleased()
   }
   else if (key == ' ') 
   {
-    currentShape.clear();
+    currentShape.clearVerts();
     currentVert = null;
   }
   else if (key == 'i') 

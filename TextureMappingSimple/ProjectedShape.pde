@@ -4,15 +4,14 @@
  * and a destination set of points (forming a polgon) that
  * the image should be mapped to.
  *
- * TODO: make ProjectedShape into an interface, then subclass it to 
- *       ProjectedVectorShape and ProjectedImageShape
- *
  *
  */
 
 class ProjectedShape
 {
   PImage srcImage = null;
+
+  String name = null;
 
   LinkedList<ProjectedShapeVertex> verts = null; // list of points in the image (PVectors)
 
@@ -23,6 +22,9 @@ class ProjectedShape
     else
       println("ERROR::::IMAGE FOR PROJECTED SHAPE CANNOT BE NULL!!");
     verts    = new LinkedList<ProjectedShapeVertex>();
+    
+    // give it a random name
+    name = "shape" + random(0,MAX_INT);
   }
 
 
@@ -48,12 +50,18 @@ class ProjectedShape
 
   void clear()
   {
+    srcImage = null;
+    
+    clearVerts();
+  }
+
+void clearVerts()
+  {    
     for (ProjectedShapeVertex v : verts)
       v.clear();
 
     verts.clear();
   }
-
 
   // sync all the projected vertices to the source verts
   void syncVertsToSource()
