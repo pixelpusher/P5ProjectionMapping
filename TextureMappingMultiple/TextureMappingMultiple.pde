@@ -1,4 +1,3 @@
-import processing.video.*;
 
 
 /*
@@ -26,6 +25,7 @@ import processing.video.*;
  */
 
 
+import processing.video.*;
 
 LinkedList<ProjectedShape> shapes = null; // list of points in the image (PVectors)
 
@@ -66,7 +66,8 @@ PFont calibri;
 void setup()
 {
   // set size and renderer
-  size(640, 480, P3D);
+  size(1024, 512, P3D);
+  frameRate(60);
   
   //calibri = loadFont("Calibri-14.vlw");
   
@@ -76,7 +77,7 @@ void setup()
   
   //textFont(calibri,12);
 
-  shapeRenderer = new ProjectedShapeRenderer(); 
+  shapeRenderer = new ProjectedShapeRenderer((PGraphicsOpenGL)g); 
   shapes = new LinkedList<ProjectedShape>();
   sourceImages = new HashMap<String, PImage>(); 
   //sourceMovies = new HashMap<ProjectedShape,Movie>();
@@ -516,4 +517,7 @@ void keyReleased()
       displayMode++;
   }
 }
+
+
+
 

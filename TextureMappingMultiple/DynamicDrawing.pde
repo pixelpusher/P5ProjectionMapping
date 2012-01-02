@@ -9,8 +9,8 @@ void setupDynamicImages()
 {
   // right now there is only the Whitney one
 
-  DynamicGraphic whitneyDynamicImage = new DynamicGraphic(this, 256, 256); 
-  whitneyDynamicImage.setup();
+  DynamicGraphic whitneyDynamicImage = new DynamicGraphic(this, 512, 512); 
+  whitneyDynamicImage.setupDynamic();
   
 
 
@@ -43,7 +43,7 @@ void setupDynamicImages()
 
 
 // TODO: instead of PGraphics, make it a subclass with app.RegisterPreDraw() ? http://wiki.processing.org/w/Register_events
-public class DynamicGraphic extends PGraphics3D
+public class DynamicGraphic extends PGraphicsOpenGL
 {
   // WhitneyScope - Jim Bumgardner
   // http://www.coverpop.com/p5/whitney_2/applet/whitney_2.pde
@@ -51,16 +51,14 @@ public class DynamicGraphic extends PGraphics3D
 
   static final String NAME = "whitney";
 
-  float   nbrPoints = 400;
-  float   cx, cy;
+  float nbrPoints;
+  float cx, cy;
   float crad;
   float cycleLength;
   float startTime;
-  int   counter =0 ;
-  float   speed = 1;
-  boolean classicStyle = false;
-
-
+  int   counter;
+  float speed;
+  
   DynamicGraphic(PApplet app, int iwidth, int iheight)
   {
     super();
@@ -76,7 +74,7 @@ public class DynamicGraphic extends PGraphics3D
     }
 
 
-    void setup()
+    void setupDynamic()
     {
       // add ourself to the glboal lists of dynamic images
       // Do we want to do this in the constructor or is that potentially evil?
@@ -85,30 +83,20 @@ public class DynamicGraphic extends PGraphics3D
       sourceDynamic.put( NAME, this );
       sourceImages.put( NAME, this );
       
-      
-      nbrPoints = 600;
-      counter =0 ;
-      speed = 4;
-      classicStyle = false;
-
-      this.beginDraw();
+      nbrPoints = 140;
+      counter = 0;
       cx = this.width/2;
       cy = this.height/2;
       crad = (min(this.width, this.height)/2) * 0.95;
-     // this.noStroke();
+      cycleLength = 320000;
+      speed = (TWO_PI*nbrPoints) / cycleLength;
+      startTime = millis();
+
+      this.beginDraw();      
       this.smooth();
       this.colorMode(HSB, 1);
-
+      // this.noStroke();
       this.background(0);
-
-      if (classicStyle)
-        cycleLength = 15*60;
-      else
-        cycleLength = 2000*15*60;
-        
-      speed = (TWO_PI*nbrPoints) / cycleLength;
-      startTime = -random(cycleLength);
-      // speed = 10;
       this.endDraw();
     }
 
@@ -125,11 +113,13 @@ public class DynamicGraphic extends PGraphics3D
       this.colorMode(HSB, 1);
       this.strokeWeight(2);
       
-      startTime = -(cycleLength*20) / (float) this.height;
-      float timer = (millis()*.001 - startTime)*speed;
+      //startTime = -(cycleLength*20) / (float) this.height;
+      float timer = (millis() - startTime) % cycleLength;
 
       this.background(0);
-      counter = int(timer / cycleLength);
+      //counter = int(timer / cycleLength);
+
+      counter = int(timer);
 
       this.beginShape();
       this.noFill();
@@ -140,19 +130,20 @@ public class DynamicGraphic extends PGraphics3D
         float r = i/(nbrPoints-1f);
         float len = crad*r;
         
-        if ((counter & 1) == 0)
-          r = 1-r;
+        //if ((counter & 1) == 0)
+        //  r = 1-r;
           
-        float a = timer * r; // pow(i * .001,2);
+        float a = timer * speed * r; // pow(i * .001,2);
         // float a = timer*2*PI/(cycleLength/i); same thing
        
         float rad = max(2, len*.05);
-        if (!classicStyle)
-          len *= sin(a*timer);  // big fun!
+        
+        //  len *= sin(a*timer);  // big fun!
+          
         float x = (cx + cos(a)*len);
         float y = (cy + sin(a)*len);
-        float h = r + timer * .01;
-        h -= int(h);
+        float h = map(sin(len*TWO_PI) * sin(PI*timer/cycleLength), -1,1, 0,1);
+        //h -= int(h);
         
         //this.fill(h, .9, 1-r/2);
         this.stroke(h, .8, 1-r/2);        

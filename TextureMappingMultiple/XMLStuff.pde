@@ -1,15 +1,4 @@
 
-// import xml functions
-import processing.xml.*;
-
-// root xml node for config data
-XMLElement configXML;
-
-final String XML_MEDIA_MOVIE_TYPE = "movie";
-final String XML_MEDIA_IMAGE_TYPE = "image";
-final String XML_MEDIA_OTHER_TYPE = "other";
-
-
 
 /*
  * XML file format:
@@ -27,15 +16,28 @@ final String XML_MEDIA_OTHER_TYPE = "other";
  *
  *    </config>
  */
+ 
+/*
+
+
+// root xml node for config data
+XML configXML;
+
+
+final String XML_MEDIA_MOVIE_TYPE = "movie";
+final String XML_MEDIA_IMAGE_TYPE = "image";
+final String XML_MEDIA_OTHER_TYPE = "other";
+
+
 
 void setupXML()
 { 
-  configXML = new XMLElement();
+  configXML = new XML();
 
   configXML.setName("config");
   configXML.setAttribute("updated", year()+"."+month()+"."+day()+"-"+hour()+":"+minute()+":"+second());
 
- // shapesXML = new XMLElement();
+ // shapesXML = new XML();
 }
 
 
@@ -44,7 +46,7 @@ void readXMLConfig(String filename)
   resetAllData();
 
   // open XML file  
-  configXML = new XMLElement (this, filename); // Tor Lundstrom
+  configXML = new XML (this, filename); // Tor Lundstrom
 
   int numChildren = configXML.getChildCount();
 
@@ -52,7 +54,7 @@ void readXMLConfig(String filename)
   for (int i=0; i < numChildren; ++i)
   {
     // top-level nodes (media, shapes)
-    XMLElement xmlNode = configXML.getChild(i);
+    XML xmlNode = configXML.getChild(i);
 
     String nodeName = xmlNode.getName();
 
@@ -72,7 +74,7 @@ void readXMLConfig(String filename)
 
       for (int j=0; j < numShapeNodes; ++j)
       {
-        XMLElement shapeNode = xmlNode.getChild(i);
+        XML shapeNode = xmlNode.getChild(i);
 
         // 1. create new shape
         // 2. assign media by name
@@ -167,4 +169,4 @@ void writeXML()
     e.printStackTrace();
   }
 }
-
+*/
