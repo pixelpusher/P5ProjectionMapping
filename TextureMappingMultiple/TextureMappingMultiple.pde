@@ -9,16 +9,20 @@
  * 
  * keys:
  *
- *  d: delete currently selected shape vertex
  *  a: add a new shape
  *  x: delete current shape
  *  <: prev shape
  *  >: next shape
- *  SPACEBAR: clear current shape
- *  i: toggle drawing source image
- *  m: next display mode ( SHOW_SOURCE, SHOW_MAPPED, SHOW_BOTH)
+ *  d: delete currently selected shape vertex
  *  s: sync vertices to source for current shape
  *  t: sync vertices to destination for current shape
+ *  SPACEBAR: clear current shape
+ *
+ *  i: toggle drawing source image
+ *  m: next display mode ( SHOW_SOURCE, SHOW_MAPPED, SHOW_BOTH)
+ *
+ *  `: save XML config to file (data/config.xml)
+ *  !: read XML config from file (data/config.xml)
  *
  *
  * TODO: reordering of shape layers
@@ -41,6 +45,10 @@ HashMap<String, PImage> sourceImages;  // list of images, keyed by file name
 HashMap<ProjectedShape, Movie> sourceMovies;  // list of movies, keyed by associated object that is using them
 HashMap<String, DynamicGraphic> sourceDynamic;  // list of dynamic images (subclass of PGraphics), keyed by name
 
+HashMap<PImage, String> imageFiles;
+HashMap<Movie, String> movieFiles;
+
+PImage blankImage;  // default image for shapes
 
 final int SHOW_SOURCE = 0;
 final int SHOW_MAPPED = 1;
@@ -68,13 +76,23 @@ void setup()
   // set size and renderer
   size(1024, 512, P3D);
   frameRate(60);
-  
+
+  blankImage = createImage(64, 64, RGB);
+  blankImage.loadPixels();
+  for (int x = 0; x < 64; x++)
+    for (int y = 0; y < 64; y++) {
+    blankImage.pixels[y*64+x] = ( (x % 8) == 0 || (y % 8) == 0) ? 
+    color(0) : color(255) ;
+  }
+  blankImage.updatePixels();
+
+
   //calibri = loadFont("Calibri-14.vlw");
-  
+
   String[] fonts = PFont.list();
   PFont font = createFont(fonts[0], 11);
-  textFont(font,16);
-  
+  textFont(font, 16);
+
   //textFont(calibri,12);
 
   shapeRenderer = new ProjectedShapeRenderer((PGraphicsOpenGL)g); 
@@ -83,11 +101,14 @@ void setup()
   //sourceMovies = new HashMap<ProjectedShape,Movie>();
   sourceDynamic = new HashMap<String, DynamicGraphic>();
 
+  imageFiles = new HashMap<PImage, String>();
+  movieFiles = new HashMap<Movie, String>();
+
   // load my image
-  PImage sourceImage = loadImageIfNecessary("7sac9xt9.bmp");
+  // PImage sourceImage = loadImageIfNecessary("7sac9xt9.bmp");
 
   // to do - check for bad image data!
-  addNewShape(sourceImage);
+  addNewShape(blankImage);
 
   // dynamic graphics
   setupDynamicImages();
@@ -164,7 +185,19 @@ void printLoadedFiles()
 //
 void unloadImage( String location )
 {
-  sourceImages.remove( location );
+  PImage img = sourceImages.remove( location );
+
+  imageFiles.remove(img);
+  movieFiles.remove(img);
+
+  // look through shapes and null out image...
+  for (ProjectedShape ps : shapes)
+  {
+    if (ps.srcImage == img)
+    {
+      ps.srcImage = blankImage;
+    }
+  }
 }
 
 
@@ -183,9 +216,12 @@ PImage loadImageIfNecessary(String location)
   }
   else
   {
-    loadedImage = loadImage( _location );
+    loadedImage = loadImage( location );
     sourceImages.put( _location, loadedImage );
   }
+
+  // map image to file location
+  imageFiles.put(loadedImage, location);
 
   return loadedImage;
 }
@@ -235,14 +271,13 @@ void draw()
 
   shapeRenderer.drawDestShape(currentShape);
   popMatrix();
-  
-  
+
+
   if (showFPS)
   {
     fill(255);
-    text("fps: " + nfs(frameRate,3,2), 4,height-18);
+    text("fps: " + nfs(frameRate, 3, 2), 4, height-18);
   }
-  
 }
 
 
@@ -423,7 +458,7 @@ void keyReleased()
   else if (key=='a')
   {
     //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
-    addNewShape(sourceDynamic.get( DynamicGraphic.NAME ) );
+    addNewShape(sourceDynamic.get( DynamicWhitney.NAME ) );
   }
 
   else if (key == '<')
@@ -476,22 +511,22 @@ void keyReleased()
   else if (key == '.')
   {
     // advance 1 image
-/*
+    /*
     if (currentShape != null)
-    {
-      Set<String> keys = sourceImages.keySet();
-      
-      ListIterator<String> iter = keys.listIterator();
-      String prev = shapes.getLast();
-
-      while (iter.hasNext () && currentShape != (nxt = iter.next()) );
-
-      if ( iter.hasNext() )
-        currentShape = iter.next();
-      else
-        currentShape = shapes.getFirst();
-    }
-*/
+     {
+     Set<String> keys = sourceImages.keySet();
+     
+     ListIterator<String> iter = keys.listIterator();
+     String prev = shapes.getLast();
+     
+     while (iter.hasNext () && currentShape != (nxt = iter.next()) );
+     
+     if ( iter.hasNext() )
+     currentShape = iter.next();
+     else
+     currentShape = shapes.getFirst();
+     }
+     */
   }
 
   else if (key == 'd' && currentVert != null)
@@ -516,8 +551,21 @@ void keyReleased()
     else
       displayMode++;
   }
+  else if (key == '`')
+  {
+    createConfigXML();
+    writeMainConfigXML();
+  }
+  else if (key == '!')
+  {
+    readConfigXML();
+  }
 }
 
 
 
+
+void movieEvent(Movie movie) {
+  movie.read();
+}
 

@@ -18,7 +18,7 @@ class ProjectedShape
   int blendMode = LIGHTEST;
   
   String name = null;
-
+  
   LinkedList<ProjectedShapeVertex> verts = null; // list of points in the image (PVectors)
 
   ProjectedShape(PImage img)

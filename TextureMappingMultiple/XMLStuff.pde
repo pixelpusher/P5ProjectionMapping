@@ -6,7 +6,7 @@
  * <config>
  *
  *   <shapes>
- *      <shape name="" media="[path]" mediatype="image|movie|other" mediaPath="...">
+ *      <shape name="" media="[path]" mediaType="image|movie|other" mediaPath="...">
  *        <vertices count="">
  *          <vertex sx="" sy="" dx="" dy="" />
  *          <vertex sx="" sy="" dx="" dy="" />
@@ -16,8 +16,6 @@
  *
  *    </config>
  */
- 
-/*
 
 
 // root xml node for config data
@@ -28,67 +26,197 @@ final String XML_MEDIA_MOVIE_TYPE = "movie";
 final String XML_MEDIA_IMAGE_TYPE = "image";
 final String XML_MEDIA_OTHER_TYPE = "other";
 
+String CONFIG_FILE_NAME = "data/config.xml";
 
 
-void setupXML()
-{ 
-  configXML = new XML();
+void writeXML(String name, XML theXml)
+{
+  PrintWriter xmlfile = createWriter(name);
 
-  configXML.setName("config");
-  configXML.setAttribute("updated", year()+"."+month()+"."+day()+"-"+hour()+":"+minute()+":"+second());
+  // DEBUG
+  print("WRITING XML FILE: ");
+  println(theXml.getName() + ":::::::::");
+  println("::CONTENT::");
+  println(theXml.getContent());
+  println("::END CONTENT::");
+  // END DEBUG
 
- // shapesXML = new XML();
+  // write file
+  xmlfile.print(configXML.toString());
+  xmlfile.flush();
+  xmlfile.close();
 }
 
 
-void readXMLConfig(String filename)
+void writeMainConfigXML()
 {
-  resetAllData();
+  writeXML(CONFIG_FILE_NAME, configXML);
+}
 
-  // open XML file  
-  configXML = new XML (this, filename); // Tor Lundstrom
 
-  int numChildren = configXML.getChildCount();
 
-  // handle nodes in file
-  for (int i=0; i < numChildren; ++i)
+void createConfigXML()
+{ 
+  configXML = new XML("config");
+  configXML.setString("updated", year()+"."+month()+"."+day()+"-"+hour()+":"+minute()+":"+second() );
+  configXML.setFloat("version", 1.0);
+
+  XML shapesXML = configXML.addChild("shapes");
+
+  // look through shapes and null out image...
+  for (ProjectedShape ps : shapes)
   {
-    // top-level nodes (media, shapes)
-    XML xmlNode = configXML.getChild(i);
 
-    String nodeName = xmlNode.getName();
+    // only add it if it has vertices!
 
-    //
-    // HANDLE MEDIA FILES
-    //    
+    if (ps.verts.size() > 0)
+    {
+      XML shapeXML = shapesXML.addChild("shape");
 
+      shapeXML.setString("name", ps.name);
+
+      String dgName = "";
+
+
+      if ((ps.srcImage) instanceof DynamicGraphic)
+      {
+        for (String name : sourceDynamic.keySet() )
+        {
+          DynamicGraphic dg = sourceDynamic.get(name);
+          if (dg == ps.srcImage)
+          {
+            dgName = name;
+            break;
+          }
+        }
+
+        // image name
+        shapeXML.setString("media", dgName);
+        // image path
+        shapeXML.setString("mediaPath", dgName);
+        // other type
+        shapeXML.setString("mediaType", XML_MEDIA_OTHER_TYPE);
+
+        // end dynamic
+      }
+
+
+      else if (ps.srcImage instanceof Movie)
+      {
+        String moviePath = movieFiles.get((Movie)ps.srcImage);
+
+        // same method we use when loading it...
+        File f = new File(moviePath);
+        String movieName = f.getName();
+
+        // movie name
+        shapeXML.setString("media", movieName);
+        // movie path
+        shapeXML.setString("mediaPath", moviePath);
+        // movie type
+        shapeXML.setString("mediaType", XML_MEDIA_MOVIE_TYPE);
+
+        // end movie
+      }
+
+
+      else if (ps.srcImage instanceof PImage)
+      {
+        String imgPath = imageFiles.get(ps.srcImage);
+        String imgName = "";
+
+        if (imgPath != null)
+        {
+          // same method we use when loading it...
+          File f = new File(imgPath);
+          imgName = f.getName();
+        }
+        else
+        {
+          imgPath = "";
+        }
+        // image name
+        shapeXML.setString("media", imgName);
+        // image path
+        shapeXML.setString("mediaPath", imgPath);
+        // image type
+        shapeXML.setString("mediaType", XML_MEDIA_IMAGE_TYPE);
+      }
+
+      //
+      // now add vertices
+      //
+
+      XML vertsXML = shapeXML.addChild("vertices");
+      vertsXML.setInt("count", ps.verts.size());
+
+      for (ProjectedShapeVertex pv : ps.verts)
+      {
+        XML vertXML = vertsXML.addChild("vertex");
+        vertXML.setFloat("sx", pv.src.x);
+        vertXML.setFloat("sy", pv.src.y);
+        vertXML.setFloat("dx", pv.dest.x);
+        vertXML.setFloat("dy", pv.dest.y);
+      }
+    }
+    // done with shapes
+  }
+
+  println("CREATED XML:");
+  println(configXML.toString());
+}
+
+
+
+//
+// Read configuration XML file, create shapes from it
+//
+
+boolean readConfigXML()
+{
+  println("READING XML CONFIG FROM: " + CONFIG_FILE_NAME);
+
+  BufferedReader reader = null;
+
+  reader = createReader(CONFIG_FILE_NAME);
+    
+    // open XML file  
+    //configXML = new XML (this, CONFIG_FILE_NAME);
+
+  if (reader != null)
+  {
+    resetAllData();
+      
+    configXML = new XML (reader);
+    XML shapeNodes[] = configXML.getChildren("shapes/shape");
+
+    println("XML: Found " + shapeNodes.length + " shape nodes");
 
     //
     // HANDLE SHAPES
-    //
-    if (nodeName == "shapes")
+    //   
+    for (int i=0; i < shapeNodes.length; ++i)
     {
-      int numShapeNodes = xmlNode.getChildCount();
+      XML shapeNode = shapeNodes[i];
 
-      println("XML: Found " + numShapeNodes + " shapes");
+      // 1. create new shape
+      // 2. assign media by name
+      // 3. add vertices
 
-      for (int j=0; j < numShapeNodes; ++j)
+      String mediaType = shapeNode.getString("mediaType");
+      String mediaPath = shapeNode.getString("mediaPath");
+      String shapeName = shapeNode.getString("name");
+
+      // debug
+      println("["+i+"]: shape[" + shapeName + " :: mediaPath:" + mediaPath + " :: mediaType:" + mediaType+"**");
+
+      ProjectedShape newShape = null;
+
+      if (mediaType.equals(XML_MEDIA_MOVIE_TYPE))
       {
-        XML shapeNode = xmlNode.getChild(i);
+        println("FOUND MOVIE!");
 
-        // 1. create new shape
-        // 2. assign media by name
-        // 3. add vertices
-
-        String mediaType = shapeNode.getStringAttribute("mediaType");
-        String mediaPath = shapeNode.getStringAttribute("mediaPath");
-        String shapeName = shapeNode.getStringAttribute("name");
-
-        // debug
-        println("... mediaPath["+j+"]:" + mediaPath);
-
-
-        if (mediaType == XML_MEDIA_MOVIE_TYPE)
+        if (mediaPath != "")
         {
           // load Movie
           Movie movie = new Movie(this, mediaPath);
@@ -110,63 +238,76 @@ void readXMLConfig(String filename)
           sourceImages.put(newPath, movie);
 
           // to do - check for bad image data!
-          ProjectedShape newShape = addNewShape(movie);
+          newShape = addNewShape(movie);
 
           // finally, add to keyed array for this shape
           sourceMovies.put(newShape, movie);
         }
+        else
+        {
+          newShape = addNewShape(blankImage);
+        }
+      }
 
-        else if (mediaType == XML_MEDIA_IMAGE_TYPE)
+      else if (mediaType.equals(XML_MEDIA_IMAGE_TYPE))
+      {
+        println("FOUND IMAGE!");
+
+        PImage sourceImage = blankImage;
+
+        if (mediaPath != "")
         {
           // load and add to HashMap of <path,PImage>
-          PImage sourceImage = loadImageIfNecessary(mediaPath);
-
-          ProjectedShape newShape = addNewShape(sourceImage);
+          sourceImage = loadImageIfNecessary(mediaPath);
         }
-        else if (mediaType == XML_MEDIA_OTHER_TYPE)
-        {
-          // in this case dynamic graphics are loaded once at the start and stay loaded,
-          // so we just look it up in the hashmap:
-          DynamicGraphic sd = sourceDynamic.get(mediaPath);
-
-          ProjectedShape newShape = addNewShape(sd);
-        }
-      
-      // done with each shape node   
+        newShape = addNewShape(sourceImage);
       }
-    //done with all shapes  
+
+      else if (mediaType.equals(XML_MEDIA_OTHER_TYPE))
+      {
+        println("FOUND OTHER!");
+
+        // in this case dynamic graphics are loaded once at the start and stay loaded,
+        // so we just look it up in the hashmap:
+        DynamicGraphic sd = sourceDynamic.get(mediaPath);
+
+        newShape = addNewShape(sd);
+      }
+
+
+      if (newShape == null)
+      {
+        println("ERROR:::creating shape failed!");
+        return false;
+      }
+
+      // load verts
+      XML vertsNode = shapeNode.getChild("vertices");
+      //int numVertNodes = vertsNode.getChildCount();
+
+      XML vertexNodes[] = vertsNode.getChildren("vertex");
+
+      println("XML: Found " + vertexNodes.length + " verts");
+      print(" :: (should be " + vertsNode.getString("count") + ")");
+
+      for (int v=0; v < vertexNodes.length; ++v)
+      {
+        XML vertNode = vertexNodes[v];
+        newShape.addVert(vertNode.getFloat("sx"), vertNode.getFloat("sy"), 
+        vertNode.getFloat("dx"), vertNode.getFloat("dy"));
+      }
+
+      // done with each shape node
+      //done with all shapes
+      // done with xml root
     }
-  // done with xml root  
+    // DONE LOADING XML
   }
-  // DONE LOADING XML
+  else
+  {
+    println("FAILED OPENING CONFIG FILE! Bad name?? Check it:" + CONFIG_FILE_NAME);
+  }
+  
+  return (reader != null);
 }
 
-
-void writeXML()
-{
-
-  // file schreiben
-  PrintWriter xmlfile;
-
-  xmlfile = createWriter("config.xml");
-
-  // DEBUG
-  println(configXML.getName());
-  println(configXML.getContent());
-
-  //write file
-  try
-  {
-    XMLWriter xmlwriter = new XMLWriter(xmlfile) ;
-
-    xmlwriter.write(configXML);
-
-    xmlfile.flush();
-    xmlfile.close();
-  }
-  catch (IOException e)
-  {
-    e.printStackTrace();
-  }
-}
-*/
