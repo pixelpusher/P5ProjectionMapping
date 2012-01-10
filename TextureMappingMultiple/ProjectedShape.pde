@@ -11,11 +11,16 @@ class ProjectedShape
 {
   PImage srcImage = null;
   
+  // for tinting:
   int r;
   int g;
   int b;
   int a;
   int blendMode = LIGHTEST;
+
+  // for outlining:
+  color srcColor = color(0, 255, 0, 180);
+  color dstColor = color(255, 0, 255, 180);
   
   String name = null;
   
@@ -32,6 +37,29 @@ class ProjectedShape
     // give it a random name
     name = "shape" + random(0,MAX_INT);
   }
+  
+  
+  // deep copy ProjectedShape
+  
+  ProjectedShape(ProjectedShape srcShape)
+  {
+    if (srcShape.srcImage != null)
+      srcImage = srcShape.srcImage;
+    else
+      println("ERROR::::IMAGE FOR PROJECTED SHAPE CANNOT BE NULL!!");
+    
+    // deep copy verts
+    verts    = new LinkedList<ProjectedShapeVertex>();
+    
+    for (ProjectedShapeVertex psvert : srcShape.verts )
+    {
+     verts.add(new ProjectedShapeVertex(psvert) );
+    }
+    
+    // give it a random name
+    name = "shape" + random(0,MAX_INT);
+  }
+  
 
 
   // Add a new source and destination vertex

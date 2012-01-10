@@ -1,5 +1,3 @@
-
-
 /*
  * First go at Projection mapping in Processing
  * Uses a list of projection-mapped shapes.
@@ -23,6 +21,7 @@
  *
  *  `: save XML config to file (data/config.xml)
  *  !: read XML config from file (data/config.xml)
+ *  ~: change default file name
  *
  *
  * TODO: reordering of shape layers
@@ -30,6 +29,8 @@
 
 
 import processing.video.*;
+import controlP5.*;
+
 
 LinkedList<ProjectedShape> shapes = null; // list of points in the image (PVectors)
 
@@ -52,16 +53,19 @@ PImage blankImage;  // default image for shapes
 
 final int SHOW_SOURCE = 0;
 final int SHOW_MAPPED = 1;
-final int SHOW_BOTH = 2;
+final int EDIT_MAPPED = 2;
 
 boolean hitSrcShape = false;
 boolean hitDestShape = false;
 boolean showFPS = true;
+boolean deleteShape = false;
 
-int displayMode = SHOW_BOTH;  
+int displayMode = SHOW_SOURCE;  
 
 final float distance = 15;
 final float distanceSquared = distance*distance;  // in pixels, for selecting verts
+
+PGraphicsOpenGL editingShapesView, mappedView; // destination output 
 
 
 boolean drawImage = true;
@@ -74,18 +78,36 @@ PFont calibri;
 void setup()
 {
   // set size and renderer
-  size(1024, 512, P3D);
+  size(1024, 768, P3D);
   frameRate(60);
 
-  blankImage = createImage(64, 64, RGB);
+  blankImage = createImage(32, 32, RGB);
   blankImage.loadPixels();
-  for (int x = 0; x < 64; x++)
-    for (int y = 0; y < 64; y++) {
-    blankImage.pixels[y*64+x] = ( (x % 8) == 0 || (y % 8) == 0) ? 
-    color(0) : color(255) ;
-  }
+  for (int x = 0; x < blankImage.width; x++)
+    for (int y = 0; y < blankImage.width; y++) {
+      blankImage.pixels[y*blankImage.width+x] = ( (x % (blankImage.width/4)) == 0 || (y % (blankImage.width/4)) == 0) ? 
+      color(0) : color(255) ;
+    }
   blankImage.updatePixels();
 
+  mappedView = (PGraphicsOpenGL)createGraphics(1024, 1024, P3D);
+  editingShapesView = (PGraphicsOpenGL)createGraphics(512, 512, P3D);
+
+  {
+    // clear mapped view screen
+    GL gl = mappedView.beginGL();
+    gl.glClearColor(0f, 0f, 0f, 1f);
+    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+    mappedView.endGL();
+  }
+
+  {
+    // clear editingShapesView screen
+    GL gl = editingShapesView.beginGL();
+    gl.glClearColor(0f, 0f, 0f, 1f);
+    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+    editingShapesView.endGL();
+  }
 
   //calibri = loadFont("Calibri-14.vlw");
 
@@ -95,7 +117,11 @@ void setup()
 
   //textFont(calibri,12);
 
-  shapeRenderer = new ProjectedShapeRenderer((PGraphicsOpenGL)g); 
+  //shapeRenderer = new ProjectedShapeRenderer((PGraphicsOpenGL)g);
+
+  // use offscreen renderer
+  shapeRenderer = new ProjectedShapeRenderer(mappedView);
+
   shapes = new LinkedList<ProjectedShape>();
   sourceImages = new HashMap<String, PImage>(); 
   //sourceMovies = new HashMap<ProjectedShape,Movie>();
@@ -112,6 +138,8 @@ void setup()
 
   // dynamic graphics
   setupDynamicImages();
+
+  hint(DISABLE_DEPTH_TEST);
 }
 
 
@@ -233,44 +261,65 @@ PImage loadImageIfNecessary(String location)
 
 void draw()
 {
-  // white background
+   // delete shape here to avoid accessing linked list during middle of draw()
+   if (deleteShape)
+   {
+     deleteShape = false;
+     shapes.remove(currentShape);
+     currentShape.clear();
+     try
+     {
+       currentShape = shapes.getFirst();
+     }
+     catch (java.util.NoSuchElementException nse)
+     {
+       addNewShape(blankImage);
+     }
+   }
+   
   background(0);
 
-
-  fill(255, 20);
-  stroke(255, 0, 255);
+  shapeRenderer.beginRender(mappedView);
 
   for (ProjectedShape projShape : shapes)
   {
-    if ( projShape != currentShape)
-    {
-      pushMatrix();
-      translate(projShape.srcImage.width, 0);
-
-      noStroke();
-      shapeRenderer.draw(projShape);
-      popMatrix();
-    }
+    //if ( projShape != currentShape)
+    //{
+    //  mappedView.pushMatrix();
+    //  mappedView.translate(projShape.srcImage.width, 0);
+    shapeRenderer.draw(projShape);
+    //  mappedView.popMatrix();
+    //}
   }
 
-  // draw shape we're editing currently
-  //
-  if (drawImage)
+  if (displayMode == SHOW_SOURCE || displayMode == EDIT_MAPPED)
+    shapeRenderer.drawDestShape(currentShape);
+
+  shapeRenderer.endRender();
+  // done with drawing mapped shapes
+
+
+  if (displayMode == SHOW_SOURCE)
   {
-    noSmooth();  // otherwise we see white lines!
-    image( currentShape.srcImage, 0, 0);
+    // start drawing source shapes
+    shapeRenderer.beginRender(editingShapesView);
+
+    // draw shape we're editing currently
+    shapeRenderer.drawSourceShape(currentShape, drawImage);
+
+    shapeRenderer.endRender();
+
+    noTint();
+    image(editingShapesView, 0, 0, editingShapesView.height, editingShapesView.width);
+    image(mappedView, width/2, 0, mappedView.width/2, mappedView.height/2);
+    strokeWeight(3);
+    stroke(255);
+    line(width/2-1, 0, width/2-1, height);
   }
-  fill(255, 20);
-  shapeRenderer.drawSourceShape(currentShape);
-
-  pushMatrix();
-  translate(currentShape.srcImage.width, 0);
-
-  noStroke();
-  shapeRenderer.draw(currentShape);
-
-  shapeRenderer.drawDestShape(currentShape);
-  popMatrix();
+  else
+  {
+    image(mappedView, 0, 0);
+  }
 
 
   if (showFPS)
@@ -278,99 +327,123 @@ void draw()
     fill(255);
     text("fps: " + nfs(frameRate, 3, 2), 4, height-18);
   }
+  switch( displayMode )
+  {
+  case SHOW_MAPPED:
+    break;
+  case EDIT_MAPPED:
+    break;
+  case SHOW_SOURCE:
+    fill(255);
+    strokeWeight(1);
+    line(0, height-36, width, height-36);
+    text("SOURCE IMAGE", 4, height-38);
+    text("MAPPED IMAGE", width/2+5, height-38);
+    break;
+  }
 }
 
 
 
 void mousePressed()
 {
+
   hitSrcShape = false;  
 
   switch( displayMode )
   {
-  case SHOW_SOURCE:
-
-    currentVert = currentShape.getClosestVertexToSource(mouseX, mouseY, distanceSquared);
-
-    if (currentVert ==  null)
-    {
-      println("*****check distance to line\n");
-
-      currentVert = currentShape.addClosestSourcePointToLine( mouseX, mouseY, distance);
-    }
-    else
-    {
-      println("*****got a vert\n\n");
-    }
-
-    if (currentVert ==  null)
-    {
-      println("*****add a vert\n\n");
-      currentVert = currentShape.addVert( mouseX, mouseY, mouseX, mouseY );
-    } 
-    break;
-
   case SHOW_MAPPED:
-    currentVert = currentShape.getClosestVertexToDest(mouseX, mouseY, distanceSquared);
-
-    if (currentVert ==  null)
+  case EDIT_MAPPED:
     {
-      currentVert = currentShape.addClosestDestPointToLine( mouseX, mouseY, distance);
-    }
+      int nmx = mouseX;
+      int nmy = mouseY;
+      int nmpx = pmouseX;
+      int nmpy = pmouseY;
 
-    if (currentVert ==  null)
-    {
-      currentVert = currentShape.addVert( mouseX, mouseY, mouseX, mouseY );
-    } 
-    break;
-
-  case SHOW_BOTH:
-
-    if (mouseX < currentShape.srcImage.width)
-    {
-      // SOURCE
-      currentVert = currentShape.getClosestVertexToSource(mouseX, mouseY, distanceSquared);
+      currentVert = currentShape.getClosestVertexToDest(nmx, nmy, distanceSquared);
 
       if (currentVert ==  null)
       {
-        currentVert = currentShape.addClosestSourcePointToLine( mouseX, mouseY, distance);
-      }
-
-      if (currentVert ==  null)
-      {   
-
-        if (isInsideShape(currentShape, mouseX, mouseY, true))
-        {
-          hitSrcShape = true;
-          println("inside src shape[" + mouseX +","+mouseY+"]");
-        }
-        else
-          currentVert = currentShape.addVert( mouseX, mouseY, mouseX, mouseY );
-      }
-    }
-    else
-    {
-      //println("mx" + (mouseX-currentShape.srcImage.width));
-
-      //DEST
-      currentVert = currentShape.getClosestVertexToDest(mouseX-currentShape.srcImage.width, mouseY, distanceSquared);
-
-      if (currentVert ==  null)
-      {
-        currentVert = currentShape.addClosestDestPointToLine( mouseX-currentShape.srcImage.width, mouseY, distance);
+        currentVert = currentShape.addClosestDestPointToLine( nmx, nmy, distance);
       }
 
       if (currentVert ==  null)
       {
-        if (isInsideShape(currentShape, mouseX-currentShape.srcImage.width, mouseY, false))
+        if (isInsideShape(currentShape, nmx, nmy, true))
         {
           hitDestShape = true;
-          println("inside dest shape[" + mouseX +","+mouseY+"]");
+          println("inside dest shape[" + nmx +","+nmy+"]");
         }
         else
+          currentVert = currentShape.addVert( nmx, nmy, nmx, nmy );
+      }
+    }
+    break;
+
+  case SHOW_SOURCE:
+    {
+      int nmx = int(mouseX*float(mappedView.width)/(width*0.5));
+      int nmy = int(mouseY*float(mappedView.height)/(width*0.5));
+      int nmpx = int(pmouseX*float(mappedView.width)/(width*0.5));
+      int nmpy = int(pmouseY*float(mappedView.height)/(width*0.5));
+
+      int boundaryX = width/2;
+      //int boundaryX = currentShape.srcImage.width;
+
+      if (mouseX < boundaryX)
+      {
+
+        nmx = mouseX*2;
+        nmy = mouseY*2;
+        nmpx = pmouseX*2;
+        nmpy = pmouseY*2;
+
+        // SOURCE
+        currentVert = currentShape.getClosestVertexToSource(nmx, nmy, distanceSquared);
+
+        if (currentVert ==  null)
         {
-          currentVert = currentShape.addVert( mouseX-currentShape.srcImage.width, mouseY, 
-          mouseX-currentShape.srcImage.width, mouseY );
+          currentVert = currentShape.addClosestSourcePointToLine( nmx, nmy, distance);
+        }
+
+        if (currentVert ==  null)
+        {   
+
+          if (isInsideShape(currentShape, nmx, nmy, true))
+          {
+            hitSrcShape = true;
+            println("inside src shape[" + nmx +","+nmy+"]");
+          }
+          else
+            currentVert = currentShape.addVert( nmx, nmy, nmx, nmy );
+        }
+      }
+      else
+      {
+        //println("mx" + (mouseX-currentShape.srcImage.width));
+
+        //DEST
+        nmx = int((mouseX-boundaryX)*mappedView.width/(width*0.5));
+
+        currentVert = currentShape.getClosestVertexToDest(nmx, nmy, distanceSquared);
+
+        if (currentVert ==  null)
+        {
+          currentVert = currentShape.addClosestDestPointToLine( nmx, nmy, distance);
+        }
+
+        if (currentVert ==  null)
+        {
+          if (isInsideShape(currentShape, nmx, nmy, false))
+          {
+            hitDestShape = true;
+            println("inside dest shape[" + nmx +","+nmy+"]");
+          }
+          else
+          {
+            currentVert = currentShape.addVert( nmx, nmy, 
+            nmx, nmy );
+          }
         }
       }
     }
@@ -393,48 +466,65 @@ void mouseDragged()
 {
   // if we have a closest vertex, update it's position
 
+  int nmx = mouseX;
+  int nmy = mouseY;
+  int nmpx = pmouseX;
+  int nmpy = pmouseY;
+
+  if (displayMode == SHOW_SOURCE)
+  {
+    nmx  = int(mouseX*float(mappedView.width)/(width*0.5));
+    nmy  = int(mouseY*float(mappedView.height)/(width*0.5));
+    nmpx = int(pmouseX*float(mappedView.width)/(width*0.5));
+    nmpy = int(pmouseY*float(mappedView.height)/(width*0.5));
+  }
+
   if (currentVert != null)
   {
     switch( displayMode )
     {
-    case SHOW_SOURCE:
-      currentVert.src.x = mouseX;
-      currentVert.src.y = mouseY;
-      break;
-
-
     case SHOW_MAPPED:
-      currentVert.dest.x = mouseX;
-      currentVert.dest.y = mouseY;
-      break;
-
-
-    case SHOW_BOTH:
-
-      if (mouseX < currentShape.srcImage.width)
+    case EDIT_MAPPED:
       {
-        currentVert.src.x = mouseX;
-        currentVert.src.y = mouseY;
-      } 
-      else 
-      {
-        println("move dest");
-        currentVert.dest.x = mouseX-currentShape.srcImage.width;
-        currentVert.dest.y = mouseY;
+        currentVert.dest.x = nmx;
+        currentVert.dest.y = nmy;
       }
-
       break;
+
+
+    case SHOW_SOURCE:
+      {
+
+        int boundaryX = width/2;
+        //int boundaryX = currentShape.srcImage.width;
+
+        if (mouseX < boundaryX)
+        {
+          currentVert.src.x = nmx;
+          currentVert.src.y = nmy;
+        } 
+        else 
+        {
+          nmx = int((mouseX-boundaryX)*mappedView.width/(width*0.5));
+
+          println("move dest");
+          currentVert.dest.x = nmx;
+          currentVert.dest.y = nmy;
+        }
+
+        break;
+      }
     }
   }
   else
     if (hitSrcShape)
     {
-      currentShape.move(mouseX-pmouseX, mouseY-pmouseY, true);
+      currentShape.move(nmx-nmpx, nmy-nmpy, true);
     }
     else
       if (hitDestShape)
       {
-        currentShape.move(mouseX-pmouseX, mouseY-pmouseY, false);
+        currentShape.move(nmx-nmpx, nmy-nmpy, false);
       }
 }
 
@@ -459,6 +549,10 @@ void keyReleased()
   {
     //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
     addNewShape(sourceDynamic.get( DynamicWhitney.NAME ) );
+
+    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
+    currentShape.dstColor = currentShape.srcColor;
+    currentShape.blendMode = ADD;
   }
 
   else if (key == '<')
@@ -506,7 +600,16 @@ void keyReleased()
         currentShape = shapes.getFirst();
     }
   }
+  else if (key == 'l' && currentShape != null)
+  {
+    // deep copy current selected shape
+    ProjectedShape newShape = new ProjectedShape(currentShape);
+    currentShape = newShape;
 
+    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
+    currentShape.dstColor = currentShape.srcColor;
+    shapes.add(currentShape);
+  }
 
   else if (key == '.')
   {
@@ -528,7 +631,10 @@ void keyReleased()
      }
      */
   }
-
+  else if (key == 'x' && currentShape != null)
+ {
+   deleteShape = true;
+ }
   else if (key == 'd' && currentVert != null)
   {
     currentShape.removeVert(currentVert);
@@ -545,16 +651,21 @@ void keyReleased()
   }  
   else if (key == 'm') 
   {
-
-    if (displayMode == SHOW_BOTH)
+    ++displayMode;
+    if (displayMode > EDIT_MAPPED)
       displayMode = SHOW_SOURCE;
-    else
-      displayMode++;
   }
   else if (key == '`')
   {
     createConfigXML();
     writeMainConfigXML();
+  }
+  else if (key == '~')
+  {
+    CONFIG_FILE_NAME = selectOutput("Choose a file name for the XML configuration:");
+    println("Chose: " + CONFIG_FILE_NAME);
+    //createConfigXML();
+    //writeMainConfigXML();
   }
   else if (key == '!')
   {

@@ -18,24 +18,27 @@ import javax.media.opengl.GL2;
 class ProjectedShapeRenderer
 {
 
+  float cr=0f, cg=0f, cb=0f, ca=1f; // clear colour
+  
   //PGraphics renderer = null;   // rendering target object
   PGraphicsOpenGL renderer;
 
   ProjectedShapeRenderer(PGraphicsOpenGL pgl)
   {
     //renderer = g;   // get default graphics object for this sketch
-    renderer = pgl; 
+    renderer = pgl;
   }
 
- 
-   // This is taken directly from the PGraphics2.java renderer
-   // Copyright (c) 2004-08 Ben Fry and Casey Reas
-   
-  public void screenBlend(int mode) {
+
+  // This is taken directly from the PGraphics2.java renderer
+  // Copyright (c) 2004-08 Ben Fry and Casey Reas
+
+    final public void screenBlend(int mode, PGraphicsOpenGL renderTarget) {
 
     boolean blendEqSupported = true;   // necessary?
-    GL gl = renderer.beginGL();
+    GL gl = renderTarget.beginGL();
     gl.glEnable(GL.GL_BLEND);
+    gl.glDisable(GL.GL_DEPTH_TEST);
 
     if (mode == REPLACE) {
       // This is equivalent to disable blending.
@@ -96,9 +99,59 @@ class ProjectedShapeRenderer
     // HARD_LIGHT, SOFT_LIGHT, OVERLAY, DODGE, BURN modes cannot be implemented
     // in fixed-function pipeline because they require conditional blending and
     // non-linear blending equations.
-    
-    renderer.endGL();
+
+    renderTarget.endGL();
   }
+
+
+
+
+//
+// various flavours of starting off rendering
+// 
+
+  void beginRender()
+  {
+    beginRender(this.renderer, true);
+  }
+
+  void beginRender(boolean clearScreen)
+  {
+    beginRender(this.renderer, clearScreen);
+  }
+
+  void beginRender(PGraphics renderTarget)
+  {
+    beginRender(renderTarget, true);
+  }
+  
+  void beginRender(PGraphics renderTarget, boolean clearScreen)
+  {
+    renderer = (PGraphicsOpenGL)renderTarget;
+    
+    renderer.beginDraw();
+
+    // black background
+    //  mappedView.background(0);
+    if (clearScreen)
+    {
+      /*
+      GL gl = renderer.beginGL();
+      gl.glClearColor(cr,cg,cb,ca);
+      gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+      renderer.endGL();
+      */
+      renderer.background(0);
+    }
+  }
+
+
+
+  void endRender()
+  {
+    this.renderer.endDraw();
+  }
+
 
 
   // Draw the source shape (no texture)
@@ -106,15 +159,28 @@ class ProjectedShapeRenderer
 
   final void drawSourceShape(final ProjectedShape projShape)
   {
-    drawSourceShape( projShape, renderer);
+    drawSourceShape( projShape, renderer, false);
+  } 
+
+  final void drawSourceShape(final ProjectedShape projShape, boolean showSrcImage)
+  {
+    drawSourceShape( projShape, renderer, showSrcImage);
   } 
 
 
-  final void drawSourceShape(final ProjectedShape projShape, PGraphics renderTarget)
+  final void drawSourceShape(final ProjectedShape projShape, PGraphics renderTarget, boolean showSrcImage)
   {
+    this.screenBlend(REPLACE, (PGraphicsOpenGL)renderTarget);
+    if (showSrcImage)
+    {
+       renderTarget.noSmooth();  // otherwise we see white lines!
+       renderTarget.image( projShape.srcImage, 0, 0, projShape.srcImage.width/2, projShape.srcImage.height/2);
+    }
+
     renderTarget.smooth();
     renderTarget.strokeWeight(2);
-    renderTarget.stroke(0, 255, 0, 80);
+    renderTarget.noFill();
+    renderTarget.stroke(projShape.srcColor);
     // draw the shape using source and destination vertices
     if (projShape.verts != null && projShape.verts.size() > 0)
     {
@@ -122,7 +188,7 @@ class ProjectedShapeRenderer
       for (ProjectedShapeVertex vert : projShape.verts)
       {
         // add it to our shape
-        renderTarget.vertex(vert.src.x, vert.src.y);
+        renderTarget.vertex(vert.src.x/2, vert.src.y/2);
       }
       renderTarget.endShape(CLOSE);
     }
@@ -130,7 +196,10 @@ class ProjectedShapeRenderer
     for (ProjectedShapeVertex vert : projShape.verts)
     {
       // add it to our shape
-      renderTarget.ellipse(vert.src.x, vert.src.y, 8, 8);
+      renderTarget.pushMatrix();
+      renderTarget.translate(vert.src.x/2, vert.src.y/2);
+      renderTarget.ellipse(0, 0, 8, 8);
+      renderTarget.popMatrix();
     }
   }
 
@@ -148,9 +217,12 @@ class ProjectedShapeRenderer
 
   final void drawDestShape(final ProjectedShape projShape, PGraphics renderTarget)
   {
+    this.screenBlend(REPLACE, (PGraphicsOpenGL)renderTarget);
     renderTarget.smooth();
     renderTarget.strokeWeight(2);
-    renderTarget.stroke(255, 0, 255, 80);
+    renderTarget.stroke(projShape.dstColor);
+    //renderTarget.stroke(255);
+    renderTarget.noFill();
 
     // draw the shape using source and destination vertices
     if (projShape.verts != null && projShape.verts.size() > 0)
@@ -159,16 +231,20 @@ class ProjectedShapeRenderer
       for (ProjectedShapeVertex vert : projShape.verts)
       {
         // add it to our shape
+        //renderTarget.vertex(vert.dest.x, vert.dest.y, vert.dest.z);
         renderTarget.vertex(vert.dest.x, vert.dest.y);
       }
       renderTarget.endShape(CLOSE);
     }
-
-    renderTarget.stroke(255, 0, 255, 80);
+    
     for (ProjectedShapeVertex vert : projShape.verts)
     {
       // add it to our shape
-      renderTarget.ellipse(vert.dest.x, vert.dest.y, 8, 8);
+      renderTarget.pushMatrix();
+      //renderTarget.translate(vert.dest.x, vert.dest.y, vert.dest.z);
+      renderTarget.translate(vert.dest.x, vert.dest.y);
+      renderTarget.ellipse(0, 0, 8, 8);
+      renderTarget.popMatrix();
     }
   }
 
@@ -179,7 +255,7 @@ class ProjectedShapeRenderer
 
   final void draw(final ProjectedShape projShape)
   {
-    draw( projShape, renderer );
+    this.draw( projShape, renderer );
   }
 
   final void draw(final ProjectedShape projShape, PGraphics renderTarget)
@@ -187,21 +263,20 @@ class ProjectedShapeRenderer
     //  the shape using source and destination vertices
     if (projShape.verts != null && projShape.verts.size() > 0)
     {
+      this.screenBlend(projShape.blendMode, (PGraphicsOpenGL)renderTarget);
+      renderTarget.noTint();
       renderTarget.noStroke();
       renderTarget.noSmooth();
-      screenBlend(projShape.blendMode);
       renderTarget.beginShape();
       renderTarget.texture( projShape.srcImage );
       for (ProjectedShapeVertex vert : projShape.verts)
       {
         // add it to our shape
-        renderTarget.vertex(vert.dest.x, vert.dest.y, vert.src.x, vert.src.y);
+        renderTarget.vertex(vert.dest.x, vert.dest.y, vert.dest.z, vert.src.x, vert.src.y);
       }
       renderTarget.endShape(CLOSE);
     }
   }
 
-
   // end class ProjectedShapeRenderer
 }
-

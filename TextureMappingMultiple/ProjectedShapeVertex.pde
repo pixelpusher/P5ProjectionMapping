@@ -9,11 +9,16 @@ class ProjectedShapeVertex
 
   ProjectedShapeVertex(PVector _src, PVector _dest)
   {
-    src = _src;
-    dest = _dest;
+    src = new PVector(_src.x, _src.y, _src.z);
+    dest = new PVector(_dest.x, _dest.y, _dest.z);
   }
 
- 
+  ProjectedShapeVertex(ProjectedShapeVertex srcVert)
+  {
+    src = new PVector(srcVert.src.x, srcVert.src.y, srcVert.src.z);
+    dest = new PVector(srcVert.dest.x, srcVert.dest.y, srcVert.dest.z);
+  }
+  
   void clear()
   {
     src = null;

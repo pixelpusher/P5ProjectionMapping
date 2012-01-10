@@ -16,6 +16,7 @@ public class DynamicWhitney extends DynamicGraphic
   float cycleLength;
   float startTime;
   int   counter;
+  int numPetals;
   float speed;
   boolean usePoints;
 
@@ -34,13 +35,14 @@ public class DynamicWhitney extends DynamicGraphic
 
   void initialize()
   {     
-    usePoints = true;
-    nbrPoints = 140;
+    numPetals = 2;
+    usePoints = false;
+    nbrPoints = 160;
     counter = 0;
     cx = this.width/2;
     cy = this.height/2;
     crad = (min(this.width, this.height)/2) * 0.95;
-    cycleLength = 320000;
+    cycleLength = 320000*4;
     speed = (TWO_PI*nbrPoints) / cycleLength;
     startTime = millis();
 
@@ -61,14 +63,22 @@ public class DynamicWhitney extends DynamicGraphic
     float my = 20;
 
     this.beginDraw();
-    this.smooth();
+    
+    GL gl = this.beginGL();
+    gl.glClearColor(0f,0f,0f,0f);
+    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+    this.endGL();
+    
+    
+    //this.smooth();
     this.colorMode(HSB, 1);
-    this.strokeWeight(2);
+    this.strokeWeight(4);
 
     //startTime = -(cycleLength*20) / (float) this.height;
     float timer = (millis() - startTime) % cycleLength;
 
-    this.background(0);
+    //this.background(0);
+    
     //counter = int(timer / cycleLength);
 
     counter = int(timer);
@@ -95,8 +105,22 @@ public class DynamicWhitney extends DynamicGraphic
       float a = timer * speed * r; // pow(i * .001,2);
       float rad = max(2, len*.05);
 
-      //  len *= sin(a*timer);  // big fun!
+      if (false)
+      {
+        float tmps = sin(numPetals*a);
+        float tmpc = cos(numPetals*a);
 
+        len *= 2*tmps*tmpc;
+      }
+      
+      if (true)
+      {
+        float tmps = sin(numPetals*(a+TWO_PI*timer/cycleLength));
+        //float tmpc = cos(numPetals*a+timer);
+
+        len *= tmps*tmps;
+      }
+      
       float x = (cx + cos(a)*len);
       float y = (cy + sin(a)*len);
       float h = map(sin(len*TWO_PI) * sin(PI*timer/cycleLength), -1, 1, 0, 1);
@@ -109,7 +133,7 @@ public class DynamicWhitney extends DynamicGraphic
       }
       else
       {
-        this.stroke(h, .8, 1-r/2);        
+        this.stroke(h, .8, 1-r/2, 0.7);
         this.curveVertex(x, y);
       }
     }

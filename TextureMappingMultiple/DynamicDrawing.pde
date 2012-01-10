@@ -1,3 +1,4 @@
+
 /*
  * This shows how to use a dynamic animation to draw into 
  * a projection-mapped shape.
@@ -10,7 +11,7 @@ void setupDynamicImages()
   // Right now there is only the Whitney one
   // All we need to do is create it, and it does the rest! 
 
-  DynamicGraphic whitneyDynamicImage = new DynamicWhitney(this, 512, 512);
+  DynamicGraphic whitneyDynamicImage = new DynamicWhitney(this, 1024, 1024);
 }
 
 

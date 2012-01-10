@@ -44,7 +44,8 @@ final float distancePointToLine(PVector l0, PVector l1, PVector p)
 
 
 // Adapted from http://paulbourke.net/geometry/insidepoly/
-// Originally by Alexander Motrichuk (in C++)
+// Originally by Alexander Motrichuk (in C++) and Paul Bourke
+// Needs to be updated to 3D!
 
 boolean isInsideShape(ProjectedShape projShape, float x, float y, boolean testSource)
 {
