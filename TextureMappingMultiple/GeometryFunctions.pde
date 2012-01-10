@@ -123,7 +123,7 @@ boolean isInsideShape(ProjectedShape projShape, float x, float y, boolean testSo
           //cross point of x
           xinters = (p.y - v1.y) * (v2.x - v1.x) / (v2.y - v1.y) + v1.x;
 
-          println("xinters: " + p.x + " / " + xinters);
+         // println("xinters: " + p.x + " / " + xinters);
 
           //overlies on a ray
           if (abs(p.x - xinters) < EPSILON) 

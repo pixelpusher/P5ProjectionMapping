@@ -54,6 +54,7 @@ PImage blankImage;  // default image for shapes
 final int SHOW_SOURCE = 0;
 final int SHOW_MAPPED = 1;
 final int EDIT_MAPPED = 2;
+final int SHOW_IMAGES = 3;
 
 boolean hitSrcShape = false;
 boolean hitDestShape = false;
@@ -81,6 +82,10 @@ void setup()
   size(1024, 768, P3D);
   frameRate(60);
 
+  // set up controlP5 gui
+  initGUI();
+  
+
   blankImage = createImage(32, 32, RGB);
   blankImage.loadPixels();
   for (int x = 0; x < blankImage.width; x++)
@@ -90,7 +95,7 @@ void setup()
     }
   blankImage.updatePixels();
 
-  mappedView = (PGraphicsOpenGL)createGraphics(1024, 1024, P3D);
+  mappedView = (PGraphicsOpenGL)createGraphics(width, height, P3D);
   editingShapesView = (PGraphicsOpenGL)createGraphics(512, 512, P3D);
 
   {
@@ -246,6 +251,8 @@ PImage loadImageIfNecessary(String location)
   {
     loadedImage = loadImage( location );
     sourceImages.put( _location, loadedImage );
+    DropdownList dl = (DropdownList)gui.getGroup("AvailableImages");
+    dl.addItem(_location, sourceImages.size());
   }
 
   // map image to file location
@@ -261,86 +268,105 @@ PImage loadImageIfNecessary(String location)
 
 void draw()
 {
-   // delete shape here to avoid accessing linked list during middle of draw()
-   if (deleteShape)
-   {
-     deleteShape = false;
-     shapes.remove(currentShape);
-     currentShape.clear();
-     try
-     {
-       currentShape = shapes.getFirst();
-     }
-     catch (java.util.NoSuchElementException nse)
-     {
-       addNewShape(blankImage);
-     }
-   }
-   
-  background(0);
-
-  shapeRenderer.beginRender(mappedView);
-
-  for (ProjectedShape projShape : shapes)
+  // delete shape here to avoid accessing linked list during middle of draw()
+  if (deleteShape)
   {
-    //if ( projShape != currentShape)
-    //{
-    //  mappedView.pushMatrix();
-    //  mappedView.translate(projShape.srcImage.width, 0);
-    shapeRenderer.draw(projShape);
-    //  mappedView.popMatrix();
-    //}
+    deleteShape = false;
+    shapes.remove(currentShape);
+    currentShape.clear();
+    try
+    {
+      currentShape = shapes.getFirst();
+    }
+    catch (java.util.NoSuchElementException nse)
+    {
+      addNewShape(blankImage);
+    }
   }
 
-  if (displayMode == SHOW_SOURCE || displayMode == EDIT_MAPPED)
-    shapeRenderer.drawDestShape(currentShape);
+  background(0);
 
-  shapeRenderer.endRender();
-  // done with drawing mapped shapes
-
-
-  if (displayMode == SHOW_SOURCE)
+  if (displayMode == SHOW_IMAGES)
   {
-    // start drawing source shapes
-    shapeRenderer.beginRender(editingShapesView);
-
-    // draw shape we're editing currently
-    shapeRenderer.drawSourceShape(currentShape, drawImage);
-
-    shapeRenderer.endRender();
-
-    noTint();
-    image(editingShapesView, 0, 0, editingShapesView.height, editingShapesView.width);
-    image(mappedView, width/2, 0, mappedView.width/2, mappedView.height/2);
-    strokeWeight(3);
-    stroke(255);
-    line(width/2-1, 0, width/2-1, height);
+    int numImages = sourceImages.size();
+    int imgsPerRow = 4;
+    int imgW = width/8; // (width/2) / 4)
+    int count = 0;
+    
+   for (PImage srcimg : sourceImages.values())
+   {
+      image(srcimg, (count % imgsPerRow)*imgW, floor(count/imgsPerRow)*imgW, imgW, imgW); 
+      ++count;
+   } 
   }
   else
   {
-    image(mappedView, 0, 0);
-  }
 
 
-  if (showFPS)
-  {
-    fill(255);
-    text("fps: " + nfs(frameRate, 3, 2), 4, height-18);
+    shapeRenderer.beginRender(mappedView);
+
+    for (ProjectedShape projShape : shapes)
+    {
+      //if ( projShape != currentShape)
+      //{
+      //  mappedView.pushMatrix();
+      //  mappedView.translate(projShape.srcImage.width, 0);
+      shapeRenderer.draw(projShape);
+      //  mappedView.popMatrix();
+      //}
+    }
+
+    if (displayMode == SHOW_SOURCE || displayMode == EDIT_MAPPED)
+      shapeRenderer.drawDestShape(currentShape);
+
+    shapeRenderer.endRender();
+    // done with drawing mapped shapes
+
+
+    if (displayMode == SHOW_SOURCE)
+    {
+      // start drawing source shapes
+      shapeRenderer.beginRender(editingShapesView);
+
+      // draw shape we're editing currently
+      shapeRenderer.drawSourceShape(currentShape, drawImage);
+
+      shapeRenderer.endRender();
+
+      noTint();
+      image(editingShapesView, 0, 0, editingShapesView.height, editingShapesView.width);
+      image(mappedView, width/2, 0, mappedView.width/2, mappedView.height/2);
+      strokeWeight(3);
+      stroke(255);
+      line(width/2-1, 0, width/2-1, height);
+    }
+    else
+    {
+      image(mappedView, 0, 0);
+    }
+
+
+    if (showFPS)
+    {
+      fill(255);
+      text("fps: " + nfs(frameRate, 3, 2), 4, height-18);
+    }
+    switch( displayMode )
+    {
+    case SHOW_MAPPED:
+      break;
+    case EDIT_MAPPED:
+      break;
+    case SHOW_SOURCE:
+      fill(255);
+      strokeWeight(1);
+      line(0, height-36, width, height-36);
+      text("SOURCE IMAGE", 4, height-38);
+      text("MAPPED IMAGE", width/2+5, height-38);
+      break;
+    }
   }
-  switch( displayMode )
-  {
-  case SHOW_MAPPED:
-    break;
-  case EDIT_MAPPED:
-    break;
-  case SHOW_SOURCE:
-    fill(255);
-    strokeWeight(1);
-    line(0, height-36, width, height-36);
-    text("SOURCE IMAGE", 4, height-38);
-    text("MAPPED IMAGE", width/2+5, height-38);
-    break;
-  }
+  // end draw
 }
 
 
@@ -369,7 +395,7 @@ void mousePressed()
 
       if (currentVert ==  null)
       {
-        if (isInsideShape(currentShape, nmx, nmy, true))
+        if (isInsideShape(currentShape, nmx, nmy, false))
         {
           hitDestShape = true;
           println("inside dest shape[" + nmx +","+nmy+"]");
@@ -383,9 +409,9 @@ void mousePressed()
   case SHOW_SOURCE:
     {
       int nmx = int(mouseX*float(mappedView.width)/(width*0.5));
-      int nmy = int(mouseY*float(mappedView.height)/(width*0.5));
+      int nmy = int(mouseY*float(mappedView.height)/(height*0.5));
       int nmpx = int(pmouseX*float(mappedView.width)/(width*0.5));
-      int nmpy = int(pmouseY*float(mappedView.height)/(width*0.5));
+      int nmpy = int(pmouseY*float(mappedView.height)/(height*0.5));
 
       int boundaryX = width/2;
       //int boundaryX = currentShape.srcImage.width;
@@ -474,9 +500,9 @@ void mouseDragged()
   if (displayMode == SHOW_SOURCE)
   {
     nmx  = int(mouseX*float(mappedView.width)/(width*0.5));
-    nmy  = int(mouseY*float(mappedView.height)/(width*0.5));
+    nmy  = int(mouseY*float(mappedView.height)/(height*0.5));
     nmpx = int(pmouseX*float(mappedView.width)/(width*0.5));
-    nmpy = int(pmouseY*float(mappedView.height)/(width*0.5));
+    nmpy = int(pmouseY*float(mappedView.height)/(height*0.5));
   }
 
   if (currentVert != null)
@@ -506,8 +532,7 @@ void mouseDragged()
         else 
         {
           nmx = int((mouseX-boundaryX)*mappedView.width/(width*0.5));
-
-          println("move dest");
+          //println("move dest");
           currentVert.dest.x = nmx;
           currentVert.dest.y = nmy;
         }
@@ -632,9 +657,9 @@ void keyReleased()
      */
   }
   else if (key == 'x' && currentShape != null)
- {
-   deleteShape = true;
- }
+  {
+    deleteShape = true;
+  }
   else if (key == 'd' && currentVert != null)
   {
     currentShape.removeVert(currentVert);
@@ -652,7 +677,7 @@ void keyReleased()
   else if (key == 'm') 
   {
     ++displayMode;
-    if (displayMode > EDIT_MAPPED)
+    if (displayMode > SHOW_IMAGES)
       displayMode = SHOW_SOURCE;
   }
   else if (key == '`')
