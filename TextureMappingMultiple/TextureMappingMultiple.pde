@@ -56,6 +56,9 @@ final int SHOW_MAPPED = 1;
 final int EDIT_MAPPED = 2;
 final int SHOW_IMAGES = 3;
 
+int fakeTime = 0; // replacement for millis() for rendering
+int renderedFrames = 0;
+
 boolean hitSrcShape = false;
 boolean hitDestShape = false;
 boolean showFPS = true;
@@ -579,6 +582,15 @@ void keyReleased()
     currentShape.dstColor = currentShape.srcColor;
     currentShape.blendMode = ADD;
   }
+  else if (key=='A')
+  {
+    //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
+    addNewShape(sourceDynamic.get( DynamicWhitneyTwo.NAME ) );
+
+    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
+    currentShape.dstColor = currentShape.srcColor;
+    currentShape.blendMode = LIGHTEST;
+  }
 
   else if (key == '<')
   {
@@ -700,8 +712,19 @@ void keyReleased()
 
 
 
-
 void movieEvent(Movie movie) {
   movie.read();
 }
+
+
+// for rendering... to replace millis() with a standard time per frame
+// uncomment when rendering to disk
+//int millis()
+//{
+//  fakeTime += 25; // 33 ms/frame
+//  println("ooot" + fakeTime);
+//  renderedFrames++;
+//  return fakeTime;
+//}
+
 

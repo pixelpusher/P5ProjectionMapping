@@ -12,6 +12,7 @@ void setupDynamicImages()
   // All we need to do is create it, and it does the rest! 
 
   DynamicGraphic whitneyDynamicImage = new DynamicWhitney(this, 1024, 1024);
+  DynamicGraphic whitneyDynamicImage2 = new DynamicWhitneyTwo(this, 1024, 1024);
 }
 
 
