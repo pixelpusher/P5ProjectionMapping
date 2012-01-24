@@ -67,6 +67,8 @@ boolean hitDestShape = false;
 boolean showFPS = true;
 boolean deleteShape = false;
 
+boolean rendering = false;
+
 int displayMode = SHOW_SOURCE;  
 
 final float distance = 15;
@@ -284,6 +286,15 @@ PImage loadImageIfNecessary(String location)
 
 void draw()
 {
+  
+  //
+  // DEBUG
+  //
+  
+  //PsychedelicWhitney psw = (PsychedelicWhitney)(sourceDynamic.get( PsychedelicWhitney.NAME ));
+  //psw.strategy1();
+  
+  
   // delete shape here to avoid accessing linked list during middle of draw()
   if (deleteShape)
   {
@@ -404,6 +415,10 @@ void draw()
     }
   }
   // end draw
+  
+  if (rendering)
+    saveFrame("frame-######.png");
+  
 }
 
 
@@ -625,7 +640,6 @@ void keyReleased()
     currentShape.dstColor = currentShape.srcColor;
     currentShape.blendMode = LIGHTEST;
   }
-  
   else if (key=='D')
   {
     //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
@@ -690,6 +704,10 @@ void keyReleased()
     currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
     currentShape.dstColor = currentShape.srcColor;
     shapes.add(currentShape);
+  }
+  else if (key == '/')
+  {
+    rendering = !rendering; 
   }
 
   else if (key == '.')

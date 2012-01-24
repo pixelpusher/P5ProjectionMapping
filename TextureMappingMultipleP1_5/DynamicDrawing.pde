@@ -28,16 +28,19 @@ abstract public class DynamicGraphic extends GLGraphicsOffScreen
 {
   static final String NAME = "default";
   boolean enabled;
+  PApplet app;
 
-  DynamicGraphic(PApplet app, int iwidth, int iheight)
-  {
-    super(app, iwidth, iheight);
+  DynamicGraphic(PApplet _app, int iwidth, int iheight)
+  {    
+    super(_app, iwidth, iheight);
 //    this.setParent(app);
 //    this.setPrimary(false);
     //setAntiAlias(true);
 //    this.setSize(iwidth, iheight);
 //    this.enabled = true;
-    
+      
+      this.app = _app;
+
     initialize();  // set up intial stuff
   
     // this attaches itself automagically to run the preDraw() method when the main
