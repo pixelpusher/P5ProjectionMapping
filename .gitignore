@@ -1,0 +1,5 @@
+frame-*
+applet_js
+.DS_Store
+sketch.properties
+*.psd
