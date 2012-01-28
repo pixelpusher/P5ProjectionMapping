@@ -15,8 +15,9 @@
  *  s: sync vertices to source for current shape
  *  t: sync vertices to destination for current shape
  *  SPACEBAR: clear current shape
+ *  i: add 4 vertices around perimeter of shape
+ *  I: same as 'i' but scale to mapped view 
  *
- *  i: toggle drawing source image
  *  m: next display mode ( SHOW_SOURCE, SHOW_MAPPED, SHOW_BOTH)
  *
  *  `: save XML config to file (data/config.xml)
@@ -286,7 +287,9 @@ PImage loadImageIfNecessary(String location)
 
 void draw()
 {
-
+ // for rendering
+  incTime();
+  
   //
   // DEBUG
   //
@@ -417,7 +420,7 @@ void draw()
   // end draw
 
   if (rendering)
-    saveFrame("frame-######.png");
+    saveFrame("frames/frame-"+ nf(renderedFrames,6)+ ".png");
 }
 
 
@@ -645,7 +648,7 @@ void keyReleased()
 
     currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
     currentShape.dstColor = currentShape.srcColor;
-    currentShape.blendMode = ADD;
+    currentShape.blendMode = BLEND;
   }
   else if (key=='A')
   {
@@ -663,7 +666,7 @@ void keyReleased()
 
     currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
     currentShape.dstColor = currentShape.srcColor;
-    currentShape.blendMode = BLEND;
+    currentShape.blendMode = ADD;
   }
 
   else if (key == '<')
@@ -723,11 +726,15 @@ void keyReleased()
   }
   else if (key == '/')
   {
+    showFPS = false;
     rendering = !rendering;
+    if (rendering) renderedFrames = 0;
   }
 
   else if (key == '.')
   {
+    showFPS = !showFPS;
+    
     // advance 1 image
     /*
     if (currentShape != null)
@@ -746,6 +753,23 @@ void keyReleased()
      }
      */
   }
+  else if (key == 'i' && currentShape != null)
+  {
+    currentShape.clearVerts();
+    currentShape.addVert(0,0, 0,0);
+    currentShape.addVert(currentShape.srcImage.width,0, currentShape.srcImage.width,0);
+    currentShape.addVert(currentShape.srcImage.width,currentShape.srcImage.height, currentShape.srcImage.width,currentShape.srcImage.height);
+    currentShape.addVert(0,currentShape.srcImage.height, 0,currentShape.srcImage.height);
+  }
+  else if (key == 'I' && currentShape != null)
+  {
+    currentShape.clearVerts();
+    currentShape.addVert(0,0, 0,0);
+    currentShape.addVert(currentShape.srcImage.width,0, mappedView.width,0);
+    currentShape.addVert(currentShape.srcImage.width,currentShape.srcImage.height, mappedView.width,mappedView.height);
+    currentShape.addVert(0,currentShape.srcImage.height, 0,mappedView.height);
+  }
+  
   else if (key == 'x' && currentShape != null)
   {
     deleteShape = true;
@@ -760,10 +784,10 @@ void keyReleased()
     currentShape.clearVerts();
     currentVert = null;
   }
-  else if (key == 'i') 
-  {
-    drawImage = !drawImage;
-  }  
+//  else if (key == 'i') 
+//  {
+//    drawImage = !drawImage;
+//  }  
   else if (key == 'm') 
   {
     ++displayMode;
@@ -800,11 +824,17 @@ void movieEvent(Movie movie) {
 
 // for rendering... to replace millis() with a standard time per frame
 // uncomment when rendering to disk
-//int millis()
-//{
-//  fakeTime += 25; // 33 ms/frame
+int millis()
+{
+  return fakeTime;
+}
+
+void incTime()
+{
+  fakeTime += 25; // 33 ms/frame
 //  println("ooot" + fakeTime);
-//  renderedFrames++;
-//  return fakeTime;
-//}
+ if (rendering)
+    renderedFrames++;
+}
+
 

@@ -56,7 +56,7 @@ public class PsychedelicWhitney extends DynamicGraphic
 
     speedRatio = 1.1;
     cycleLength = 60000;
-    numPoints = 160*4;
+    numPoints = 160*2;
     blobSize = 20;
 
     fadeAmount = 0.5;
@@ -201,7 +201,7 @@ public class PsychedelicWhitney extends DynamicGraphic
   void strategy3()
   {
     waveHeight = this.height/2;
-    this.glmodel.setSpriteSize(20, 400);
+    this.glmodel.setSpriteSize(abs(sin(frameCount*0.01))*50+5, 400);
     this.glmodel.setBlendMode(ADD);
     periods = 3;
     
@@ -228,6 +228,8 @@ public class PsychedelicWhitney extends DynamicGraphic
           sin( map(movedIndex, 0, numPoints, 0, periods*2*TWO_PI) ) 
           + dampedHeight;
 
+    heightValue *= abs(sin(frameCount*0.002)) * abs(sin(frameCount*0.002)) ;
+
         float nx = map(movedIndex, 0, numPoints, 0, this.width);
 
         float x = lerp(v.x, this.width-nx, fadeAmount);
@@ -244,8 +246,8 @@ public class PsychedelicWhitney extends DynamicGraphic
         // invert the height (so it grows from the bottom up instead of top down)
         heightValue = this.height-heightValue;
 
-        x = lerp(v.x, nx, fadeAmount);
-        y = lerp(v.y, heightValue, fadeAmount);
+        //x = lerp(v.x, nx, fadeAmount);
+        //y = lerp(v.y, heightValue, fadeAmount);
 
         v.set( x, y, 0);
 
@@ -277,7 +279,7 @@ public class PsychedelicWhitney extends DynamicGraphic
         // equal to 1.0 (e.g., 0.2 + 0.8 = 1.0) because otherwise the height of the 
         // additive sin wave will be too large (greater than 1.0)
         // 
-        heightValue = dampedHeight * ( 0.6*sinVal1 + 0.4*sinVal2) + dampedHeight;
+        heightValue = abs(sin(frameCount*0.002)) * dampedHeight * ( 0.6*sinVal1 + 0.4*sinVal2 + 1);
 
         x = heightValue*cos(angle) + this.width/2;
         y = heightValue*sin(angle)*0.25 + this.height/2;
@@ -421,7 +423,7 @@ public class PsychedelicWhitney extends DynamicGraphic
     // Setting the distance attenuation function so that the sprite size
     // is 20 when the distance to the camera is 400.
 
-    this.glmodel.setSpriteSize(20, 600);
+    this.glmodel.setSpriteSize(60, 600);
     this.glmodel.setBlendMode(BLEND);
   }
 
