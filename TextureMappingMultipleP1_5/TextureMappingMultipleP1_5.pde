@@ -87,7 +87,7 @@ PFont calibri;
 void setup()
 {
   // set size and renderer
-  size(1024, 768, GLConstants.GLGRAPHICS);
+  size(1024*2, 768, GLConstants.GLGRAPHICS);
   frameRate(60);
 
   setupGLGlow();
@@ -114,7 +114,7 @@ void setup()
 
   mappedView = new GLGraphicsOffScreen(this, width, height, true, 4);  
 
-  editingShapesView = new GLGraphicsOffScreen(this, 512, 512);  
+  editingShapesView = new GLGraphicsOffScreen(this, width/2, height/2);  
 
   {
     // clear mapped view screen
@@ -286,15 +286,15 @@ PImage loadImageIfNecessary(String location)
 
 void draw()
 {
-  
+
   //
   // DEBUG
   //
-  
+
   //PsychedelicWhitney psw = (PsychedelicWhitney)(sourceDynamic.get( PsychedelicWhitney.NAME ));
   //psw.strategy1();
-  
-  
+
+
   // delete shape here to avoid accessing linked list during middle of draw()
   if (deleteShape)
   {
@@ -331,8 +331,6 @@ void draw()
   }
   else
   {
-
-
     shapeRenderer.beginRender(mappedView);
 
     for (ProjectedShape projShape : shapes)
@@ -368,32 +366,34 @@ void draw()
       // post-render glow effect
       //
       doGLGlow(mappedView);
-      
+
       PImage mappedImage = (PImage)destTex;
       // not mappedView.getTexture()
 
       noTint();
-      image(editingShapesView.getTexture(), 0, 0, editingShapesView.height, editingShapesView.width);
-      image(mappedImage, width/2, 0, mappedView.width/2, mappedView.height/2);
+      image(editingShapesView.getTexture(), 0, 0);
+      image(mappedImage, width/2, 0, width/2, height/2);
       strokeWeight(3);
       stroke(255);
       line(width/2-1, 0, width/2-1, height);
     }
+
+    // now draw for reals
     else
     {
       doGLGlow(mappedView);
-      
+
       PImage mappedImage = (PImage)destTex;
       // not mappedView.getTexture()
-      
-      image(mappedImage, 0, 0);
+
+      image(mappedImage, 0, 0, width, height);
     }
 
     noStroke();
-    
+
     // BLEND MODE LEAKS!
     // That's why this is necessary
-     shapeRenderer.screenBlend(BLEND, (PGraphicsOpenGL)(this.g));
+    shapeRenderer.screenBlend(BLEND, (PGraphicsOpenGL)(this.g));
     if (showFPS)
     {
       //      fill(255);
@@ -415,10 +415,9 @@ void draw()
     }
   }
   // end draw
-  
+
   if (rendering)
     saveFrame("frame-######.png");
-  
 }
 
 
@@ -426,82 +425,20 @@ void draw()
 void mousePressed()
 {
 
-  hitSrcShape = false;  
-
-  switch( displayMode )
+  if (!gui.window(this).isMouseOver())
   {
-  case SHOW_MAPPED:
-  case EDIT_MAPPED:
+
+    hitSrcShape = false;  
+
+    switch( displayMode )
     {
-      int nmx = mouseX;
-      int nmy = mouseY;
-      int nmpx = pmouseX;
-      int nmpy = pmouseY;
-
-      currentVert = currentShape.getClosestVertexToDest(nmx, nmy, distanceSquared);
-
-      if (currentVert ==  null)
+    case SHOW_MAPPED:
+    case EDIT_MAPPED:
       {
-        currentVert = currentShape.addClosestDestPointToLine( nmx, nmy, distance);
-      }
-
-      if (currentVert ==  null)
-      {
-        if (isInsideShape(currentShape, nmx, nmy, false))
-        {
-          hitDestShape = true;
-          println("inside dest shape[" + nmx +","+nmy+"]");
-        }
-        else
-          currentVert = currentShape.addVert( nmx, nmy, nmx, nmy );
-      }
-    }
-    break;
-
-  case SHOW_SOURCE:
-    {
-      int nmx = int(mouseX*float(mappedView.width)/(width*0.5));
-      int nmy = int(mouseY*float(mappedView.height)/(height*0.5));
-      int nmpx = int(pmouseX*float(mappedView.width)/(width*0.5));
-      int nmpy = int(pmouseY*float(mappedView.height)/(height*0.5));
-
-      int boundaryX = width/2;
-      //int boundaryX = currentShape.srcImage.width;
-
-      if (mouseX < boundaryX)
-      {
-
-        nmx = mouseX*2;
-        nmy = mouseY*2;
-        nmpx = pmouseX*2;
-        nmpy = pmouseY*2;
-
-        // SOURCE
-        currentVert = currentShape.getClosestVertexToSource(nmx, nmy, distanceSquared);
-
-        if (currentVert ==  null)
-        {
-          currentVert = currentShape.addClosestSourcePointToLine( nmx, nmy, distance);
-        }
-
-        if (currentVert ==  null)
-        {   
-
-          if (isInsideShape(currentShape, nmx, nmy, true))
-          {
-            hitSrcShape = true;
-            println("inside src shape[" + nmx +","+nmy+"]");
-          }
-          else
-            currentVert = currentShape.addVert( nmx, nmy, nmx, nmy );
-        }
-      }
-      else
-      {
-        //println("mx" + (mouseX-currentShape.srcImage.width));
-
-        //DEST
-        nmx = int((mouseX-boundaryX)*mappedView.width/(width*0.5));
+        int nmx = mouseX;
+        int nmy = mouseY;
+        int nmpx = pmouseX;
+        int nmpy = pmouseY;
 
         currentVert = currentShape.getClosestVertexToDest(nmx, nmy, distanceSquared);
 
@@ -518,14 +455,90 @@ void mousePressed()
             println("inside dest shape[" + nmx +","+nmy+"]");
           }
           else
+            currentVert = currentShape.addVert( nmx, nmy, nmx, nmy );
+        }
+      }
+      break;
+
+    case SHOW_SOURCE:
+      {
+
+        int boundaryX = editingShapesView.width;
+
+        if (mouseX < boundaryX)
+        {
+
+          //      int nmx = int( float(mouseX)/width * mappedWidthRatio * currentShape.srcImage.width);
+          //*currentShape.srcImage.width/float(mappedView.width)
+
+
+          int nmx = (int)map(mouseX, 0, editingShapesView.width, 0, mappedView.width);        
+          int nmy = int( mappedView.height * mouseY/float(editingShapesView.height) );
+
+
+          /*
+         int nmx = (int)map(mouseX, 0,width/2, 0, currentShape.srcImage.width);      
+           int nmy = int(mouseY*float(mappedView.height)/(height));
+           int nmpx = int(pmouseX*float(mappedView.width)/(width));
+           int nmpy = int(pmouseY*float(mappedView.height)/(height));
+           */
+
+          // SOURCE
+          currentVert = currentShape.getClosestVertexToSource(nmx, nmy, distanceSquared);
+
+          if (currentVert ==  null)
           {
-            currentVert = currentShape.addVert( nmx, nmy, 
-            nmx, nmy );
+            currentVert = currentShape.addClosestSourcePointToLine( nmx, nmy, distance);
+          }
+
+          if (currentVert ==  null)
+          {   
+
+            if (isInsideShape(currentShape, nmx, nmy, true))
+            {
+              hitSrcShape = true;
+              println("inside src shape[" + nmx +","+nmy+"]");
+            }
+            else
+              currentVert = currentShape.addVert( nmx, nmy, nmx, nmy );
+          }
+        }
+        else
+        {
+
+          int nmx = int((mouseX-boundaryX)*mappedView.width/(width-editingShapesView.width));
+          int nmy  = int(mouseY*float(mappedView.height)/(editingShapesView.height));
+          int nmpx =int((pmouseX-boundaryX)*mappedView.width/(width-editingShapesView.width));
+          int nmpy = int(pmouseY*float(mappedView.height)/(editingShapesView.height));
+
+          //println("mx" + (mouseX-currentShape.srcImage.width));
+
+          //DEST
+
+          currentVert = currentShape.getClosestVertexToDest(nmx, nmy, distanceSquared);
+
+          if (currentVert ==  null)
+          {
+            currentVert = currentShape.addClosestDestPointToLine( nmx, nmy, distance);
+          }
+
+          if (currentVert ==  null)
+          {
+            if (isInsideShape(currentShape, nmx, nmy, false))
+            {
+              hitDestShape = true;
+              println("inside dest shape[" + nmx +","+nmy+"]");
+            }
+            else
+            {
+              currentVert = currentShape.addVert( nmx, nmy, 
+              nmx, nmy );
+            }
           }
         }
       }
+      break;
     }
-    break;
   }
 }
 
@@ -542,67 +555,70 @@ void mouseReleased()
 
 void mouseDragged()
 {
-  // if we have a closest vertex, update it's position
-
-  int nmx = mouseX;
-  int nmy = mouseY;
-  int nmpx = pmouseX;
-  int nmpy = pmouseY;
-
-  if (displayMode == SHOW_SOURCE)
+  if (!gui.window(this).isMouseOver())
   {
-    nmx  = int(mouseX*float(mappedView.width)/(width*0.5));
-    nmy  = int(mouseY*float(mappedView.height)/(height*0.5));
-    nmpx = int(pmouseX*float(mappedView.width)/(width*0.5));
-    nmpy = int(pmouseY*float(mappedView.height)/(height*0.5));
-  }
+    // if we have a closest vertex, update it's position
 
-  if (currentVert != null)
-  {
-    switch( displayMode )
+    int nmx = mouseX;
+    int nmy = mouseY;
+    int nmpx = pmouseX;
+    int nmpy = pmouseY;
+
+    if (displayMode == SHOW_SOURCE)
     {
-    case SHOW_MAPPED:
-    case EDIT_MAPPED:
+      nmx = (int)map(mouseX, 0, editingShapesView.width, 0, mappedView.width);        
+      nmy = int( mappedView.height * mouseY/float(editingShapesView.height) );
+      nmpx = (int)map(pmouseX, 0, editingShapesView.width, 0, mappedView.width);        
+      nmpy = int( mappedView.height * pmouseY/float(editingShapesView.height) );
+    }
+
+    if (currentVert != null)
+    {
+      switch( displayMode )
       {
-        currentVert.dest.x = nmx;
-        currentVert.dest.y = nmy;
-      }
-      break;
-
-
-    case SHOW_SOURCE:
-      {
-
-        int boundaryX = width/2;
-        //int boundaryX = currentShape.srcImage.width;
-
-        if (mouseX < boundaryX)
+      case SHOW_MAPPED:
+      case EDIT_MAPPED:
         {
-          currentVert.src.x = nmx;
-          currentVert.src.y = nmy;
-        } 
-        else 
-        {
-          nmx = int((mouseX-boundaryX)*mappedView.width/(width*0.5));
-          //println("move dest");
           currentVert.dest.x = nmx;
           currentVert.dest.y = nmy;
         }
-
         break;
+
+
+      case SHOW_SOURCE:
+        {
+
+          int boundaryX = width/2;
+          //int boundaryX = currentShape.srcImage.width;
+
+          if (mouseX < boundaryX)
+          {
+            currentVert.src.x = nmx;
+            currentVert.src.y = nmy;
+          } 
+          else 
+          {
+            nmx = int((mouseX-boundaryX)*mappedView.width/(width*0.5));
+            //println("move dest");
+            currentVert.dest.x = nmx;
+            currentVert.dest.y = nmy;
+          }
+
+          break;
+        }
       }
-    }
-  }
-  else
-    if (hitSrcShape)
-    {
-      currentShape.move(nmx-nmpx, nmy-nmpy, true);
     }
     else
-      if (hitDestShape)
+      if (hitSrcShape)
       {
-        currentShape.move(nmx-nmpx, nmy-nmpy, false);
+        currentShape.move(nmx-nmpx, nmy-nmpy, true);
       }
+      else
+        if (hitDestShape)
+        {
+          currentShape.move(nmx-nmpx, nmy-nmpy, false);
+        }
+  }
 }
 
 
@@ -707,7 +723,7 @@ void keyReleased()
   }
   else if (key == '/')
   {
-    rendering = !rendering; 
+    rendering = !rendering;
   }
 
   else if (key == '.')
@@ -756,8 +772,8 @@ void keyReleased()
   }
   else if (key == '`')
   {
-     createConfigXML();
-     writeMainConfigXML();
+    createConfigXML();
+    writeMainConfigXML();
   }
   else if (key == '~')
   {

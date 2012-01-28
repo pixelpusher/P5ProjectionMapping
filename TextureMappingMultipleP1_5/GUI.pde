@@ -12,9 +12,9 @@ void initGUI()
   gui = new ControlP5(this);
   gui.addButton("buttonOpenFile", 0, 100, 100, 80, 19);
   gui.addDropdownList("AvailableImages", 90, 100, 100, 120);
-  Slider slider = gui.addSlider("fx", 0.01f, 1f, 0.1f, guiX, guiY, 100, 20);
+  Slider slider = gui.addSlider("fx", 0.001f, 1f, 0.1f, guiX, guiY, 200, 20);
   guiY += slider.getHeight()+2;
-  slider = gui.addSlider("fy", 0.01f, 1f, 0.1f, guiX, guiY, 100, 20);
+  slider = gui.addSlider("fy", 0.001f, 1f, 0.1f, guiX, guiY, 200, 20);
 
 }
 
