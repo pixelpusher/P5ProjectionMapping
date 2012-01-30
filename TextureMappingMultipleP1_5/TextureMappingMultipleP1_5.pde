@@ -81,6 +81,9 @@ GLGraphicsOffScreen editingShapesView, mappedView; // destination output
 boolean drawImage = true;
 PFont calibri;
 
+
+ArrayList<DrawableNode> loadedImagesNodes;
+
 // 
 // setup
 //
@@ -162,6 +165,8 @@ void setup()
 
   // dynamic graphics
   setupDynamicImages();
+
+  loadedImagesNodes = new ArrayList<DrawableNode>();
 
   hint(DISABLE_DEPTH_TEST);
 }
@@ -272,6 +277,18 @@ PImage loadImageIfNecessary(String location)
     sourceImages.put( _location, loadedImage );
     DropdownList dl = (DropdownList)gui.getGroup("AvailableImages");
     dl.addItem(_location, sourceImages.size());
+
+    /// add new image button
+
+    int numImages = sourceImages.size();
+    int imgsPerRow = 4;
+    int imgW = width/8; // (width/2) / 4)
+    int imgIndex = loadedImagesNodes.size();
+
+    float imgx =  (imgIndex % imgsPerRow)*imgW;
+    float imgy =  (imgIndex/imgsPerRow)*imgW; 
+
+    loadedImagesNodes.add( new ImageNode(loadedImage, imgx, imgy, imgW, imgW ) );
   }
 
   // map image to file location
@@ -287,9 +304,9 @@ PImage loadImageIfNecessary(String location)
 
 void draw()
 {
- // for rendering
+  // for rendering
   incTime();
-  
+
   //
   // DEBUG
   //
@@ -318,6 +335,12 @@ void draw()
 
   if (displayMode == SHOW_IMAGES)
   {
+    for (DrawableNode node : loadedImagesNodes)
+    {
+      node.draw();
+    }
+    
+    /*
     int numImages = sourceImages.size();
     int imgsPerRow = 4;
     int imgW = width/8; // (width/2) / 4)
@@ -331,6 +354,7 @@ void draw()
       image(srcimg, (count % imgsPerRow)*imgW, floor(count/imgsPerRow)*imgW, imgW, imgW); 
       ++count;
     }
+    */
   }
   else
   {
@@ -420,7 +444,7 @@ void draw()
   // end draw
 
   if (rendering)
-    saveFrame("frames/frame-"+ nf(renderedFrames,6)+ ".png");
+    saveFrame("frames/frame-"+ nf(renderedFrames, 6)+ ".png");
 }
 
 
@@ -428,6 +452,9 @@ void draw()
 void mousePressed()
 {
 
+  println("MOUSE PRESSED");
+
+  // first check if we're in the GUI
   if (!gui.window(this).isMouseOver())
   {
 
@@ -470,21 +497,8 @@ void mousePressed()
 
         if (mouseX < boundaryX)
         {
-
-          //      int nmx = int( float(mouseX)/width * mappedWidthRatio * currentShape.srcImage.width);
-          //*currentShape.srcImage.width/float(mappedView.width)
-
-
           int nmx = (int)map(mouseX, 0, editingShapesView.width, 0, mappedView.width);        
           int nmy = int( mappedView.height * mouseY/float(editingShapesView.height) );
-
-
-          /*
-         int nmx = (int)map(mouseX, 0,width/2, 0, currentShape.srcImage.width);      
-           int nmy = int(mouseY*float(mappedView.height)/(height));
-           int nmpx = int(pmouseX*float(mappedView.width)/(width));
-           int nmpy = int(pmouseY*float(mappedView.height)/(height));
-           */
 
           // SOURCE
           currentVert = currentShape.getClosestVertexToSource(nmx, nmy, distanceSquared);
@@ -508,7 +522,6 @@ void mousePressed()
         }
         else
         {
-
           int nmx = int((mouseX-boundaryX)*mappedView.width/(width-editingShapesView.width));
           int nmy  = int(mouseY*float(mappedView.height)/(editingShapesView.height));
           int nmpx =int((pmouseX-boundaryX)*mappedView.width/(width-editingShapesView.width));
@@ -541,8 +554,26 @@ void mousePressed()
         }
       }
       break;
+
+    case SHOW_IMAGES:
+
+    for (DrawableNode node : loadedImagesNodes)
+    {
+      if (node.pointInside(mouseX,mouseY))
+      {
+        currentShape.srcImage = ((ImageNode)node).img;
+      }
+      displayMode = SHOW_SOURCE;
     }
+
+
+      break;
+      // end mode switch
+    }
+
+    // end if mouse is not over GUI
   }
+  //end mouse pressed
 }
 
 
@@ -627,196 +658,6 @@ void mouseDragged()
 
 
 
-void keyPressed()
-{
-}
-
-void keyReleased()
-{
-  if (key == 's' || key =='S' && currentShape != null)
-  {
-    currentShape.syncVertsToSource();
-  }
-  else if (key == 't' || key =='T' && currentShape != null)
-  {
-    currentShape.syncVertsToDest();
-  }
-  else if (key=='a')
-  {
-    //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
-    addNewShape(sourceDynamic.get( DynamicWhitney.NAME ) );
-
-    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.dstColor = currentShape.srcColor;
-    currentShape.blendMode = BLEND;
-  }
-  else if (key=='A')
-  {
-    //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
-    addNewShape(sourceDynamic.get( DynamicWhitneyTwo.NAME ) );
-
-    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.dstColor = currentShape.srcColor;
-    currentShape.blendMode = LIGHTEST;
-  }
-  else if (key=='D')
-  {
-    //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
-    addNewShape(sourceDynamic.get( PsychedelicWhitney.NAME ) );
-
-    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.dstColor = currentShape.srcColor;
-    currentShape.blendMode = ADD;
-  }
-
-  else if (key == '<')
-  {
-    // back up 1
-
-    if (currentShape == null)
-    {
-      // may as well use the 1st
-      currentShape = shapes.getFirst();
-    }
-    else
-    {
-      ListIterator<ProjectedShape> iter = shapes.listIterator();
-      ProjectedShape prev = shapes.getLast();
-      ProjectedShape nxt = prev;
-
-      while (iter.hasNext () && currentShape != (nxt = iter.next()) )
-      {
-        prev = nxt;
-      }
-      currentShape = prev;
-    }
-  }
-
-  else if (key == '>')
-  {
-    // back up 1
-
-    if (currentShape == null)
-    {
-      // may as well use the 1st
-      currentShape = shapes.getFirst();
-    }
-    else
-    {
-      ListIterator<ProjectedShape> iter = shapes.listIterator();
-      ProjectedShape nxt = shapes.getLast();
-
-      while (iter.hasNext () && currentShape != (nxt = iter.next()) );
-
-      if ( iter.hasNext() )
-        currentShape = iter.next();
-      else
-        currentShape = shapes.getFirst();
-    }
-  }
-  else if (key == 'l' && currentShape != null)
-  {
-    // deep copy current selected shape
-    ProjectedShape newShape = new ProjectedShape(currentShape);
-    currentShape = newShape;
-
-    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.dstColor = currentShape.srcColor;
-    shapes.add(currentShape);
-  }
-  else if (key == '/')
-  {
-    showFPS = false;
-    rendering = !rendering;
-    if (rendering) renderedFrames = 0;
-  }
-
-  else if (key == '.')
-  {
-    showFPS = !showFPS;
-    
-    // advance 1 image
-    /*
-    if (currentShape != null)
-     {
-     Set<String> keys = sourceImages.keySet();
-     
-     ListIterator<String> iter = keys.listIterator();
-     String prev = shapes.getLast();
-     
-     while (iter.hasNext () && currentShape != (nxt = iter.next()) );
-     
-     if ( iter.hasNext() )
-     currentShape = iter.next();
-     else
-     currentShape = shapes.getFirst();
-     }
-     */
-  }
-  else if (key == 'i' && currentShape != null)
-  {
-    currentShape.clearVerts();
-    currentShape.addVert(0,0, 0,0);
-    currentShape.addVert(currentShape.srcImage.width,0, currentShape.srcImage.width,0);
-    currentShape.addVert(currentShape.srcImage.width,currentShape.srcImage.height, currentShape.srcImage.width,currentShape.srcImage.height);
-    currentShape.addVert(0,currentShape.srcImage.height, 0,currentShape.srcImage.height);
-  }
-  else if (key == 'I' && currentShape != null)
-  {
-    currentShape.clearVerts();
-    currentShape.addVert(0,0, 0,0);
-    currentShape.addVert(currentShape.srcImage.width,0, mappedView.width,0);
-    currentShape.addVert(currentShape.srcImage.width,currentShape.srcImage.height, mappedView.width,mappedView.height);
-    currentShape.addVert(0,currentShape.srcImage.height, 0,mappedView.height);
-  }
-  
-  else if (key == 'x' && currentShape != null)
-  {
-    deleteShape = true;
-  }
-  else if (key == 'd' && currentVert != null)
-  {
-    currentShape.removeVert(currentVert);
-    currentVert = null;
-  }
-  else if (key == ' ') 
-  {
-    currentShape.clearVerts();
-    currentVert = null;
-  }
-//  else if (key == 'i') 
-//  {
-//    drawImage = !drawImage;
-//  }  
-  else if (key == 'm') 
-  {
-    ++displayMode;
-    if (displayMode > SHOW_IMAGES)
-      displayMode = SHOW_SOURCE;
-  }
-  else if (key == '`')
-  {
-    createConfigXML();
-    writeMainConfigXML();
-  }
-  else if (key == '~')
-  {
-    println("Chosing a file");
-    noLoop();
-    CONFIG_FILE_NAME = selectOutput("Choose a file name for the XML configuration:");
-    println("Chose: " + CONFIG_FILE_NAME);
-    createConfigXML();
-    writeMainConfigXML();
-    loop();
-  }
-  else if (key == '!')
-  {
-    readConfigXML();
-  }
-}
-
-
-
 void movieEvent(Movie movie) {
   movie.read();
 }
@@ -832,9 +673,8 @@ int millis()
 void incTime()
 {
   fakeTime += 25; // 33 ms/frame
-//  println("ooot" + fakeTime);
- if (rendering)
+  //  println("ooot" + fakeTime);
+  if (rendering)
     renderedFrames++;
 }
-
 
