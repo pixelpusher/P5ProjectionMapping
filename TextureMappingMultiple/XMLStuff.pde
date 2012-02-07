@@ -6,7 +6,7 @@
  * <config>
  *
  *   <shapes>
- *      <shape name="" media="[path]" mediaType="image|movie|other" mediaPath="...">
+ *      <shape name="" media="[path]" mediaType="image|movie|other" mediaPath="..." color="r,g,b,a">
  *        <vertices count="">
  *          <vertex sx="" sy="" dx="" dy="" />
  *          <vertex sx="" sy="" dx="" dy="" />
@@ -179,14 +179,14 @@ boolean readConfigXML()
   BufferedReader reader = null;
 
   reader = createReader(CONFIG_FILE_NAME);
-    
-    // open XML file  
-    //configXML = new XML (this, CONFIG_FILE_NAME);
+
+  // open XML file  
+  //configXML = new XML (this, CONFIG_FILE_NAME);
 
   if (reader != null)
   {
     resetAllData();
-      
+
     configXML = new XML (reader);
     XML shapeNodes[] = configXML.getChildren("shapes/shape");
 
@@ -220,6 +220,8 @@ boolean readConfigXML()
         {
           // load Movie
           Movie movie = new Movie(this, mediaPath);
+          if (movie == null) println("FAILED OPENING MOVIE");
+          movie.loop();
 
           File f = new File(mediaPath);
           String pathEnd = f.getName();
@@ -236,9 +238,12 @@ boolean readConfigXML()
 
           // add to our list of available media
           sourceImages.put(newPath, movie);
-
+movieFiles.put(movie, newPath);
           // to do - check for bad image data!
           newShape = addNewShape(movie);
+          newShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
+          newShape.dstColor = newShape.srcColor;
+          newShape.blendMode = ADD;
 
           // finally, add to keyed array for this shape
           sourceMovies.put(newShape, movie);
@@ -272,6 +277,9 @@ boolean readConfigXML()
         DynamicGraphic sd = sourceDynamic.get(mediaPath);
 
         newShape = addNewShape(sd);
+        newShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
+        newShape.dstColor = newShape.srcColor;
+        newShape.blendMode = ADD;
       }
 
 
@@ -307,7 +315,7 @@ boolean readConfigXML()
   {
     println("FAILED OPENING CONFIG FILE! Bad name?? Check it:" + CONFIG_FILE_NAME);
   }
-  
+
   return (reader != null);
 }
 
