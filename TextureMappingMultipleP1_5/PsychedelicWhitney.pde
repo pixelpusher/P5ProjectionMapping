@@ -56,11 +56,11 @@ public class PsychedelicWhitney extends DynamicGraphic
 
     intervalTime = new int[6];
     intervalTime[0] = 1000 * 20; // 30 sec
-    intervalTime[1] = 1000 * 60; // 30 sec
-    intervalTime[2] = 1000 * 20; // 30 sec
+    intervalTime[1] = 1000 * 30; // 30 sec
+    intervalTime[2] = 1000 * 60; // 30 sec
     intervalTime[3] = 1000 * 30; // 30 sec
     intervalTime[4] = 1000 * 60; // 30 sec
-    intervalTime[5] = 1000 * 20; // 30 sec
+    intervalTime[5] = 1000 * 30; // 30 sec
 
     fadeAmount = 0;
 
@@ -156,8 +156,10 @@ public class PsychedelicWhitney extends DynamicGraphic
 
 
     if (currentInterval < 2 )
+    {
     strategy1();
-
+    //strategy4X();
+    }
     else if (currentInterval < 4)
     strategy2();
 
@@ -232,7 +234,7 @@ public class PsychedelicWhitney extends DynamicGraphic
 
   void strategy2()
   {
-    this.glmodel.setSpriteSize(abs(sin(frameCount*0.01))*50+5, 400);
+    this.glmodel.setSpriteSize(abs(sin(frameCount*0.01))*40+5, 200);
 
     //    if (this.glmodel != null)
     //    {
@@ -299,7 +301,7 @@ public class PsychedelicWhitney extends DynamicGraphic
   void strategy3()
   {
     waveHeight = this.height/2;
-    this.glmodel.setSpriteSize(abs(sin(frameCount*0.01))*50+5, 400);
+    this.glmodel.setSpriteSize(abs(sin(frameCount*0.01))*40+5, 200);
     this.glmodel.setBlendMode(ADD);
     periods = 3;
 
@@ -516,7 +518,7 @@ public class PsychedelicWhitney extends DynamicGraphic
     // Setting the distance attenuation function so that the sprite size
     // is 20 when the distance to the camera is 400.
 
-    this.glmodel.setSpriteSize(60, 600);
+    this.glmodel.setSpriteSize(20, 400);
     this.glmodel.setBlendMode(BLEND);
   }
 

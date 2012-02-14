@@ -1,44 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config updated="2012.1.28-15:44:6" version="1.0">
+<config updated="2012.2.7-19:12:25" version="1.0">
   <shapes>
-    <shape media="psychowhitney" mediaPath="psychowhitney" mediaType="other" name="shape2.78027264E8">
+    <shape media="psychowhitney" mediaPath="psychowhitney" mediaType="other" name="shape1.72870285E9">
       <vertices count="4">
-        <vertex dx="0.0" dy="0.0" sx="0.0" sy="0.0"/>
-        <vertex dx="2048.0" dy="0.0" sx="2048.0" sy="0.0"/>
-        <vertex dx="2048.0" dy="768.0" sx="2048.0" sy="768.0"/>
-        <vertex dx="0.0" dy="768.0" sx="0.0" sy="768.0"/>
+        <vertex dx="12.0" dy="102.0" sx="0.0" sy="0.0"/>
+        <vertex dx="1023.0" dy="114.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="1019.0" dy="653.0" sx="1024.0" sy="768.0"/>
+        <vertex dx="12.0" dy="663.0" sx="0.0" sy="768.0"/>
       </vertices>
     </shape>
-    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape1.76991706E9">
+    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape2.09071846E9">
       <vertices count="4">
-        <vertex dx="0.0" dy="0.0" sx="0.0" sy="0.0"/>
-        <vertex dx="512.0" dy="0.0" sx="512.0" sy="0.0"/>
-        <vertex dx="512.0" dy="512.0" sx="512.0" sy="512.0"/>
-        <vertex dx="0.0" dy="512.0" sx="0.0" sy="512.0"/>
+        <vertex dx="4.0" dy="100.0" sx="0.0" sy="0.0"/>
+        <vertex dx="463.0" dy="107.0" sx="512.0" sy="0.0"/>
+        <vertex dx="463.0" dy="544.0" sx="512.0" sy="512.0"/>
+        <vertex dx="11.0" dy="558.0" sx="0.0" sy="512.0"/>
       </vertices>
     </shape>
-    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape2.12975898E9">
-      <vertices count="4">
-        <vertex dx="224.0" dy="172.0" sx="0.0" sy="0.0"/>
-        <vertex dx="736.0" dy="172.0" sx="512.0" sy="0.0"/>
-        <vertex dx="736.0" dy="684.0" sx="512.0" sy="512.0"/>
-        <vertex dx="224.0" dy="684.0" sx="0.0" sy="512.0"/>
+    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape1.37286874E9">
+      <vertices count="7">
+        <vertex dx="272.0" dy="439.0" sx="62.0" sy="70.0"/>
+        <vertex dx="569.0" dy="437.0" sx="494.0" sy="62.0"/>
+        <vertex dx="574.0" dy="598.0" sx="492.0" sy="398.0"/>
+        <vertex dx="472.0" dy="598.0" sx="390.0" sy="398.0"/>
+        <vertex dx="470.0" dy="646.0" sx="388.0" sy="446.0"/>
+        <vertex dx="574.0" dy="660.0" sx="492.0" sy="498.0"/>
+        <vertex dx="271.0" dy="659.0" sx="64.0" sy="494.0"/>
       </vertices>
     </shape>
-    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape1.54378739E9">
+    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape2.06995725E9">
       <vertices count="4">
-        <vertex dx="1431.0" dy="149.0" sx="0.0" sy="0.0"/>
-        <vertex dx="1943.0" dy="149.0" sx="512.0" sy="0.0"/>
-        <vertex dx="1943.0" dy="661.0" sx="512.0" sy="512.0"/>
-        <vertex dx="1431.0" dy="661.0" sx="0.0" sy="512.0"/>
+        <vertex dx="540.0" dy="19.0" sx="0.0" sy="0.0"/>
+        <vertex dx="1052.0" dy="19.0" sx="512.0" sy="0.0"/>
+        <vertex dx="1052.0" dy="531.0" sx="512.0" sy="512.0"/>
+        <vertex dx="540.0" dy="531.0" sx="0.0" sy="512.0"/>
       </vertices>
     </shape>
-    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape5.6485082E8">
+    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape1.84257664E9">
       <vertices count="4">
-        <vertex dx="1208.0" dy="-18.0" sx="0.0" sy="0.0"/>
-        <vertex dx="1720.0" dy="-18.0" sx="512.0" sy="0.0"/>
-        <vertex dx="1720.0" dy="494.0" sx="512.0" sy="512.0"/>
-        <vertex dx="1208.0" dy="494.0" sx="0.0" sy="512.0"/>
+        <vertex dx="553.0" dy="307.0" sx="0.0" sy="0.0"/>
+        <vertex dx="858.0" dy="305.0" sx="512.0" sy="0.0"/>
+        <vertex dx="868.0" dy="561.0" sx="512.0" sy="512.0"/>
+        <vertex dx="557.0" dy="565.0" sx="0.0" sy="512.0"/>
       </vertices>
     </shape>
   </shapes>

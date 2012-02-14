@@ -37,15 +37,15 @@ void keyReleased()
     currentShape.dstColor = currentShape.srcColor;
     currentShape.blendMode = LIGHTEST;
   }
-  else if (key=='D')
-  {
-    //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
-    addNewShape(sourceDynamic.get( PsychedelicWhitney.NAME ) );
-    currentShape.srcColor = color(255,160);
-//    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.dstColor = currentShape.srcColor;
-    currentShape.blendMode = ADD;
-  }
+//  else if (key=='D')
+//  {
+//    //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
+//    addNewShape(sourceDynamic.get( PsychedelicWhitney.NAME ) );
+//    currentShape.srcColor = color(255,160);
+////    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
+//    currentShape.dstColor = currentShape.srcColor;
+//    currentShape.blendMode = ADD;
+//  }
 
   else if (key == '<')
   {

@@ -65,12 +65,12 @@ int renderedFrames = 0;
 
 boolean hitSrcShape = false;
 boolean hitDestShape = false;
-boolean showFPS = true;
+boolean showFPS = false;
 boolean deleteShape = false;
 
 boolean rendering = false;
 
-int displayMode = SHOW_SOURCE;  
+int displayMode = SHOW_MAPPED;  
 
 final float distance = 15;
 final float distanceSquared = distance*distance;  // in pixels, for selecting verts
@@ -84,6 +84,29 @@ PFont calibri;
 
 ArrayList<DrawableNode> loadedImagesNodes;
 
+
+// overriding PApplet.init() to remove title bar, etc
+/*
+void init() {
+ 
+  // trick to make it possible to change the frame properties
+  frame.removeNotify(); 
+ 
+  // comment this out to turn OS chrome back on
+  frame.setUndecorated(true); 
+ 
+  // comment this out to not have the window "float"
+  frame.setAlwaysOnTop(true); 
+ 
+//  frame.setResizable(true);  
+  frame.addNotify(); 
+ 
+  // making sure to call PApplet.init() so that things 
+  // get  properly set up.
+  super.init();
+}
+*/
+
 // 
 // setup
 //
@@ -91,8 +114,13 @@ ArrayList<DrawableNode> loadedImagesNodes;
 void setup()
 {
   // set size and renderer
-  size(1024*2, 768, GLConstants.GLGRAPHICS);
+  size(1024, 768, GLConstants.GLGRAPHICS);
   frameRate(60);
+  noCursor();
+
+//  frame.setUndecorated(true);
+
+  //frame.setLocation(0,0);
 
   setupGLGlow();
 
@@ -144,8 +172,6 @@ void setup()
 
   //textFont(calibri,12);
 
-  //shapeRenderer = new ProjectedShapeRenderer((PGraphicsOpenGL)g);
-
   // use offscreen renderer
   shapeRenderer = new ProjectedShapeRenderer(mappedView);
 
@@ -169,6 +195,9 @@ void setup()
   loadedImagesNodes = new ArrayList<DrawableNode>();
 
   hint(DISABLE_DEPTH_TEST);
+
+  // finally, read in XML config
+  readConfigXML();
 }
 
 
@@ -305,7 +334,7 @@ PImage loadImageIfNecessary(String location)
 void draw()
 {
   // for rendering
-  incTime();
+//  incTime();
 
   //
   // DEBUG
@@ -662,7 +691,7 @@ void movieEvent(Movie movie) {
   movie.read();
 }
 
-
+/*
 // for rendering... to replace millis() with a standard time per frame
 // uncomment when rendering to disk
 int millis()
@@ -677,4 +706,4 @@ void incTime()
   if (rendering)
     renderedFrames++;
 }
-
+*/
