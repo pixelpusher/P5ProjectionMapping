@@ -2,7 +2,6 @@
  * First go at Projection mapping in Processing
  * Uses a list of projection-mapped shapes.
  * Only really works in Processing 2.0a4 or newer. 
- *
  * by Evan Raskob
  * 
  * keys:
@@ -15,8 +14,9 @@
  *  s: sync vertices to source for current shape
  *  t: sync vertices to destination for current shape
  *  SPACEBAR: clear current shape
+ *  i: add 4 vertices around perimeter of shape
+ *  I: same as 'i' but scale to mapped view 
  *
- *  i: toggle drawing source image
  *  m: next display mode ( SHOW_SOURCE, SHOW_MAPPED, SHOW_BOTH)
  *
  *  `: save XML config to file (data/config.xml)
@@ -30,6 +30,9 @@
 
 import processing.video.*;
 import controlP5.*;
+import processing.opengl.*;
+import javax.media.opengl.*;
+import codeanticode.glgraphics.*;
 
 
 LinkedList<ProjectedShape> shapes = null; // list of points in the image (PVectors)
@@ -61,10 +64,12 @@ int renderedFrames = 0;
 
 boolean hitSrcShape = false;
 boolean hitDestShape = false;
-boolean showFPS = true;
+boolean showFPS = false;
 boolean deleteShape = false;
 
-int displayMode = SHOW_SOURCE;  
+boolean rendering = false;
+
+int displayMode = SHOW_MAPPED;  
 
 final float distance = 15;
 final float distanceSquared = distance*distance;  // in pixels, for selecting verts
@@ -132,7 +137,7 @@ void setup()
 
   shapes = new LinkedList<ProjectedShape>();
   sourceImages = new HashMap<String, PImage>(); 
-  //sourceMovies = new HashMap<ProjectedShape,Movie>();
+  sourceMovies = new HashMap<ProjectedShape,Movie>();
   sourceDynamic = new HashMap<String, DynamicGraphic>();
 
   imageFiles = new HashMap<PImage, String>();
@@ -558,161 +563,8 @@ void mouseDragged()
 
 
 
-
-void keyPressed()
+void movieEvent(Movie movie) 
 {
-}
-
-void keyReleased()
-{
-  if (key == 's' || key =='S' && currentShape != null)
-  {
-    currentShape.syncVertsToSource();
-  }
-  else if (key == 't' || key =='T' && currentShape != null)
-  {
-    currentShape.syncVertsToDest();
-  }
-  else if (key=='a')
-  {
-    //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
-    addNewShape(sourceDynamic.get( DynamicWhitney.NAME ) );
-
-    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.dstColor = currentShape.srcColor;
-    currentShape.blendMode = ADD;
-  }
-  else if (key=='A')
-  {
-    //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
-    addNewShape(sourceDynamic.get( DynamicWhitneyTwo.NAME ) );
-
-    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.dstColor = currentShape.srcColor;
-    currentShape.blendMode = LIGHTEST;
-  }
-
-  else if (key == '<')
-  {
-    // back up 1
-
-    if (currentShape == null)
-    {
-      // may as well use the 1st
-      currentShape = shapes.getFirst();
-    }
-    else
-    {
-      ListIterator<ProjectedShape> iter = shapes.listIterator();
-      ProjectedShape prev = shapes.getLast();
-      ProjectedShape nxt = prev;
-
-      while (iter.hasNext () && currentShape != (nxt = iter.next()) )
-      {
-        prev = nxt;
-      }
-      currentShape = prev;
-    }
-  }
-
-  else if (key == '>')
-  {
-    // back up 1
-
-    if (currentShape == null)
-    {
-      // may as well use the 1st
-      currentShape = shapes.getFirst();
-    }
-    else
-    {
-      ListIterator<ProjectedShape> iter = shapes.listIterator();
-      ProjectedShape nxt = shapes.getLast();
-
-      while (iter.hasNext () && currentShape != (nxt = iter.next()) );
-
-      if ( iter.hasNext() )
-        currentShape = iter.next();
-      else
-        currentShape = shapes.getFirst();
-    }
-  }
-  else if (key == 'l' && currentShape != null)
-  {
-    // deep copy current selected shape
-    ProjectedShape newShape = new ProjectedShape(currentShape);
-    currentShape = newShape;
-
-    currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.dstColor = currentShape.srcColor;
-    shapes.add(currentShape);
-  }
-
-  else if (key == '.')
-  {
-    // advance 1 image
-    /*
-    if (currentShape != null)
-     {
-     Set<String> keys = sourceImages.keySet();
-     
-     ListIterator<String> iter = keys.listIterator();
-     String prev = shapes.getLast();
-     
-     while (iter.hasNext () && currentShape != (nxt = iter.next()) );
-     
-     if ( iter.hasNext() )
-     currentShape = iter.next();
-     else
-     currentShape = shapes.getFirst();
-     }
-     */
-  }
-  else if (key == 'x' && currentShape != null)
-  {
-    deleteShape = true;
-  }
-  else if (key == 'd' && currentVert != null)
-  {
-    currentShape.removeVert(currentVert);
-    currentVert = null;
-  }
-  else if (key == ' ') 
-  {
-    currentShape.clearVerts();
-    currentVert = null;
-  }
-  else if (key == 'i') 
-  {
-    drawImage = !drawImage;
-  }  
-  else if (key == 'm') 
-  {
-    ++displayMode;
-    if (displayMode > SHOW_IMAGES)
-      displayMode = SHOW_SOURCE;
-  }
-  else if (key == '`')
-  {
-    createConfigXML();
-    writeMainConfigXML();
-  }
-  else if (key == '~')
-  {
-    CONFIG_FILE_NAME = selectOutput("Choose a file name for the XML configuration:");
-    println("Chose: " + CONFIG_FILE_NAME);
-    //createConfigXML();
-    //writeMainConfigXML();
-  }
-  else if (key == '!')
-  {
-    readConfigXML();
-  }
-}
-
-
-
-void movieEvent(Movie movie) {
   movie.read();
 }
 
