@@ -30,9 +30,6 @@
 
 import processing.video.*;
 import controlP5.*;
-import processing.opengl.*;
-import javax.media.opengl.*;
-import codeanticode.glgraphics.*;
 
 
 LinkedList<ProjectedShape> shapes = null; // list of points in the image (PVectors)
