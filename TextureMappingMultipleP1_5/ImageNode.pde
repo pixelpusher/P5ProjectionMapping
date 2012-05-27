@@ -45,29 +45,27 @@ class ImageNode extends DrawableNode
 
 
 
-  void draw()
+  void draw(PGraphics renderer)
   {
     // fill, or tint in this case
     if (hasFill) 
     {
-      tint(fillColor);
+      renderer.tint(fillColor);
     } 
     else {
-      noFill();
+      renderer.noTint();
     }
 
-    imageMode(CORNER);
-    image(img, minX, minY, w, h);
+    renderer.imageMode(CORNER);
+    renderer.image(img, minX, minY, w, h);
   }
   
   
   void unload()
   {
     img = null;
+    super.unload();
   }
   
 // end class
 }
-
-
-

@@ -29,6 +29,7 @@
 
 
 import processing.video.*;
+import processing.opengl.*;
 import controlP5.*;
 
 
@@ -88,7 +89,7 @@ void setup()
   frameRate(60);
 
   // set up controlP5 gui
-  initGUI();
+  //initGUI();
   
 
   blankImage = createImage(32, 32, RGB);
@@ -105,18 +106,18 @@ void setup()
 
   {
     // clear mapped view screen
-    GL gl = mappedView.beginGL();
-    gl.glClearColor(0f, 0f, 0f, 1f);
-    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-    mappedView.endGL();
+   //GL gl = mappedView.beginGL();
+    mappedView.pgl.glClearColor(0f, 0f, 0f, 1f);
+    mappedView.pgl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+    //mappedView.endGL();
   }
 
   {
     // clear editingShapesView screen
-    GL gl = editingShapesView.beginGL();
-    gl.glClearColor(0f, 0f, 0f, 1f);
-    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-    editingShapesView.endGL();
+    //GL gl = editingShapesView.beginGL();
+    editingShapesView.pgl.glClearColor(0f, 0f, 0f, 1f);
+editingShapesView.pgl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+    //editingShapesView.endGL();
   }
 
   //calibri = loadFont("Calibri-14.vlw");

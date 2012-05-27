@@ -1,7 +1,8 @@
 /*
  * First go at Projection mapping in Processing
  * Uses a list of projection-mapped shapes.
- * Uses Processing 1.5 and GLGraphics 
+ * Uses Processing 1.5 and GLGraphics.
+ * Defaults to loading data/config.xml and some dynamic drawings  
  *
  * by Evan Raskob
  * 
@@ -14,10 +15,14 @@
  *  d: delete currently selected shape vertex
  *  s: sync vertices to source for current shape
  *  t: sync vertices to destination for current shape
+ *  l: duplicate the selected shape
  *  SPACEBAR: clear current shape
  *  i: add 4 vertices around perimeter of shape
  *  I: same as 'i' but scale to mapped view 
- *
+ *  [: hide mouse
+ *  ]: show mouse
+ *  .: toggle FPS display on/off
+ *  /: pause rendering
  *  m: next display mode ( SHOW_SOURCE, SHOW_MAPPED, SHOW_BOTH)
  *
  *  `: save XML config to file (data/config.xml)
@@ -36,7 +41,7 @@ import javax.media.opengl.*;
 import codeanticode.glgraphics.*;
 
 
-LinkedList<ProjectedShape> shapes = null; // list of points in the image (PVectors)
+LinkedList<ProjectedShape> shapes = null; // Here are all the ProjectedShapes that comtain the geometry for mapping images onto them
 
 ProjectedShapeVertex currentVert = null; // reference to the currently selected vert
 
@@ -46,14 +51,14 @@ float maxDistToVert = 10;  //max distance between mouse and a vertex for moving
 
 ProjectedShape currentShape = null;
 
-HashMap<String, PImage> sourceImages;  // list of images, keyed by file name
-HashMap<ProjectedShape, Movie> sourceMovies;  // list of movies, keyed by associated object that is using them
+HashMap<String, PImage> sourceImages;  // list of all available images for mapping, keyed by file name
+HashMap<ProjectedShape, Movie> sourceMovies;  // list of movies, keyed by associated ProjectedShape object that is using them
 HashMap<String, DynamicGraphic> sourceDynamic;  // list of dynamic images (subclass of PGraphics), keyed by name
 
 HashMap<PImage, String> imageFiles;
 HashMap<Movie, String> movieFiles;
 
-PImage blankImage;  // default image for shapes
+PImage blankImage;  // default checkered image for shapes
 
 final int SHOW_SOURCE = 0;
 final int SHOW_MAPPED = 1;

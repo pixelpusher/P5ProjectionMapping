@@ -64,10 +64,10 @@ public class DynamicWhitney extends DynamicGraphic
 
     this.beginDraw();
     
-    GL gl = this.beginGL();
-    gl.glClearColor(0f,0f,0f,0f);
-    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-    this.endGL();
+    //GL gl = this.beginGL();
+    this.pgl.glClearColor(0f,0f,0f,0f);
+    this.pgl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+    //this.endGL();
     
     
     //this.smooth();

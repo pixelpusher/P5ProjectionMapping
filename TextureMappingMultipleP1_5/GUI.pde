@@ -89,4 +89,36 @@ void loadImageFile() {
 }
 
 
+void loadXMLFile() {
+  try {
+    SwingUtilities. invokeLater(new Runnable() {
+      public void run() {
+ 
+        int return_val = file_chooser.showOpenDialog(null);
+        if ( return_val == JFileChooser.CANCEL_OPTION )   System.out.println("canceled");
+        if ( return_val == JFileChooser.ERROR_OPTION )    System.out.println("error");
+        if ( return_val == JFileChooser.APPROVE_OPTION )  
+        {
+          System.out.println("approved");
+        
+          File file = file_chooser.getSelectedFile();
+          filename = file.getAbsolutePath();
+        } else {
+          filename = "none";
+        }
+        if (filename != "none") 
+        {
+          CONFIG_FILE_NAME = filename;
+          readConfigXML();
+        }
+      }
+    }
+    );
+  } 
+  catch (Exception e) {
+    e.printStackTrace();
+  }
+}
+
+
 

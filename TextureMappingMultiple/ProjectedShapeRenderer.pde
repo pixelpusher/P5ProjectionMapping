@@ -37,31 +37,31 @@ class ProjectedShapeRenderer
     final public void screenBlend(int mode, PGraphicsOpenGL renderTarget) {
 
     boolean blendEqSupported = true;   // necessary?
-    GL gl = renderTarget.beginGL();
-    gl.glEnable(GL.GL_BLEND);
-    gl.glDisable(GL.GL_DEPTH_TEST);
+    //GL gl = renderTarget.beginGL();
+    renderTarget.pgl.glEnable(GL.GL_BLEND);
+    renderTarget.pgl.glDisable(GL.GL_DEPTH_TEST);
 
     if (mode == REPLACE) {
       // This is equivalent to disable blending.
-      if (blendEqSupported) gl.glBlendEquation(GL.GL_FUNC_ADD);
-      gl.glBlendFunc(GL.GL_ONE, GL.GL_ZERO);
+      if (blendEqSupported) renderTarget.pgl.glBlendEquation(GL.GL_FUNC_ADD);
+  renderTarget.pgl.glBlendFunc(GL.GL_ONE, GL.GL_ZERO);
     } 
     else if (mode == BLEND) {
-      if (blendEqSupported) gl.glBlendEquation(GL.GL_FUNC_ADD);
-      gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+      if (blendEqSupported) renderTarget.pgl.glBlendEquation(GL.GL_FUNC_ADD);
+      renderTarget.pgl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
     } 
     else if (mode == ADD) {
-      if (blendEqSupported) gl.glBlendEquation(GL.GL_FUNC_ADD);
-      gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
+      if (blendEqSupported) renderTarget.pgl.glBlendEquation(GL.GL_FUNC_ADD);
+      renderTarget.pgl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
     } 
     else if (mode == SUBTRACT) {
-      if (blendEqSupported) gl.glBlendEquation(GL.GL_FUNC_ADD);
-      gl.glBlendFunc(GL.GL_ONE_MINUS_DST_COLOR, GL.GL_ZERO);
+      if (blendEqSupported) renderTarget.pgl.glBlendEquation(GL.GL_FUNC_ADD);
+      renderTarget.pgl.glBlendFunc(GL.GL_ONE_MINUS_DST_COLOR, GL.GL_ZERO);
     } 
     else if (mode == LIGHTEST) {
       if (blendEqSupported) {
-        gl.glBlendEquation(GL2.GL_MAX);
-        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
+        renderTarget.pgl.glBlendEquation(GL2.GL_MAX);
+        renderTarget.pgl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
       } 
       else {
         PGraphics.showWarning("OPENGL2: This blend mode is currently unsupported.");
@@ -69,8 +69,8 @@ class ProjectedShapeRenderer
     } 
     else if (mode == DARKEST) {
       if (blendEqSupported) {
-        gl.glBlendEquation(GL2.GL_MIN);
-        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
+        renderTarget.pgl.glBlendEquation(GL2.GL_MIN);
+        renderTarget.pgl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
       } 
       else {
         PGraphics.showWarning("OPENGL2: This blend mode is currently unsupported.");
@@ -78,30 +78,30 @@ class ProjectedShapeRenderer
     } 
     else if (mode == DIFFERENCE) {
       if (blendEqSupported) {
-        gl.glBlendEquation(GL.GL_FUNC_REVERSE_SUBTRACT);
-        gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
+        renderTarget.pgl.glBlendEquation(GL.GL_FUNC_REVERSE_SUBTRACT);
+        renderTarget.pgl.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
       } 
       else {
         PGraphics.showWarning("OPENGL2: This blend mode is currently unsupported.");
       }
     } 
     else if (mode == EXCLUSION) {
-      if (blendEqSupported) gl.glBlendEquation(GL.GL_FUNC_ADD);
-      gl.glBlendFunc(GL.GL_ONE_MINUS_DST_COLOR, GL.GL_ONE_MINUS_SRC_COLOR);
+      if (blendEqSupported) renderTarget.pgl.glBlendEquation(GL.GL_FUNC_ADD);
+      renderTarget.pgl.glBlendFunc(GL.GL_ONE_MINUS_DST_COLOR, GL.GL_ONE_MINUS_SRC_COLOR);
     } 
     else if (mode == MULTIPLY) {
-      if (blendEqSupported) gl.glBlendEquation(GL.GL_FUNC_ADD);
-      gl.glBlendFunc(GL.GL_DST_COLOR, GL.GL_SRC_COLOR);
+      if (blendEqSupported) renderTarget.pgl.glBlendEquation(GL.GL_FUNC_ADD);
+      renderTarget.pgl.glBlendFunc(GL.GL_DST_COLOR, GL.GL_SRC_COLOR);
     } 
     else if (mode == SCREEN) {
-      if (blendEqSupported) gl.glBlendEquation(GL.GL_FUNC_ADD);
-      gl.glBlendFunc(GL.GL_ONE_MINUS_DST_COLOR, GL.GL_ONE);
+      if (blendEqSupported) renderTarget.pgl.glBlendEquation(GL.GL_FUNC_ADD);
+      renderTarget.pgl.glBlendFunc(GL.GL_ONE_MINUS_DST_COLOR, GL.GL_ONE);
     }
     // HARD_LIGHT, SOFT_LIGHT, OVERLAY, DODGE, BURN modes cannot be implemented
     // in fixed-function pipeline because they require conditional blending and
     // non-linear blending equations.
 
-    renderTarget.endGL();
+    //renderTarget.endGL();
   }
 
 
