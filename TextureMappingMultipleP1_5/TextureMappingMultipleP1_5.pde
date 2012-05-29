@@ -91,6 +91,7 @@ ArrayList<DrawableNode> loadedImagesNodes;
 
 
 // overriding PApplet.init() to remove title bar, etc
+// uncomment it out for 2nd monitor viewing (recommended)
 /*
 void init() {
  
@@ -123,9 +124,8 @@ void setup()
   frameRate(60);
   noCursor();
 
-//  frame.setUndecorated(true);
-
-  //frame.setLocation(0,0);
+  // uncomment this for 2nd monitor viewing
+  // frame.setLocation(screenWidth,0);
 
   setupGLGlow();
 
