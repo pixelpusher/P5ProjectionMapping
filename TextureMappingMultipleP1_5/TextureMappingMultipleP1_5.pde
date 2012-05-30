@@ -27,10 +27,14 @@
  *
  *  `: save XML config to file (data/config.xml)
  *  !: read XML config from file (data/config.xml)
- *  ~: change default file name
+ *  ~: save new XML config file (using file chooser)
+ *  @: load config file (using file chooser)
  *
  *
- * TODO: reordering of shape layers
+ * TODO: 
+ * 1. reordering of shape layers
+ * 2. undo - could just duplicate LinkedList<ProjectedShape> shapes, it's a pretty lightweight way to save/restore states 
+ 
  */
 
 
@@ -45,7 +49,7 @@ LinkedList<ProjectedShape> shapes = null; // Here are all the ProjectedShapes th
 
 ProjectedShapeVertex currentVert = null; // reference to the currently selected vert
 
-ProjectedShapeRenderer shapeRenderer = null;
+ProjectedShapeRenderer shapeRenderer = null; // this renders (draws) the shapes to the screen 
 
 float maxDistToVert = 10;  //max distance between mouse and a vertex for moving
 

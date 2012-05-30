@@ -121,4 +121,40 @@ void loadXMLFile() {
 }
 
 
+void saveXMLFile() {
+  try {
+    SwingUtilities. invokeLater(new Runnable() {
+      public void run() {
+ 
+        int return_val = file_chooser.showSaveDialog(null);
+        if ( return_val == JFileChooser.CANCEL_OPTION )   System.out.println("canceled");
+        if ( return_val == JFileChooser.ERROR_OPTION )    System.out.println("error");
+        if ( return_val == JFileChooser.APPROVE_OPTION )  
+        {
+          System.out.println("approved");
+        
+          File file = file_chooser.getSelectedFile();
+          filename = file.getAbsolutePath();
+        } else {
+          filename = "none";
+        }
+        if (filename != "none") 
+        {
+          CONFIG_FILE_NAME = filename;
+
+          println("Chose: " + CONFIG_FILE_NAME + " for saving");
+          createConfigXML();
+          writeMainConfigXML();
+        }
+      }
+    }
+    );
+  } 
+  catch (Exception e) {
+    e.printStackTrace();
+  }
+}
+
+
+
 

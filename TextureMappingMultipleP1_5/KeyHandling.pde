@@ -214,12 +214,9 @@ void keyReleased()
   }
   else if (key == '~')
   {
-    println("Chosing a file");
+    println("Chosing a file for saving:");
     noLoop();
-    CONFIG_FILE_NAME = selectOutput("Choose a file name for the XML configuration:");
-    println("Chose: " + CONFIG_FILE_NAME);
-    createConfigXML();
-    writeMainConfigXML();
+    saveXMLFile();
     loop();
   }
   else if (key == '!')

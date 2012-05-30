@@ -1,5 +1,5 @@
 //------------------------------------------------------------------
-// This draws a "Whitney" image
+// This draws a black and white grid that chages over time
 //------------------------------------------------------------------
 
 public class DynamicBWGraphic extends DynamicGraphic
