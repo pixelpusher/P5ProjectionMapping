@@ -31,6 +31,8 @@ public class DynamicWhitneyTwo extends DynamicGraphic
     // Or potentially check for other entries in the HashMap and save to a different name
     sourceDynamic.put( NAME, this );
     sourceImages.put( NAME, this );    
+    
+    initialize();
   }
 
   void initialize()
@@ -58,11 +60,10 @@ public class DynamicWhitneyTwo extends DynamicGraphic
   //
   // do the actual drawing (off-screen)
   //
-  void pre()
+  void drawGraphic()
   {
     float my = 20;
 
-    this.beginDraw();
     
     GL gl = this.beginGL();
     gl.glClearColor(0f,0f,0f,0f);
@@ -71,8 +72,8 @@ public class DynamicWhitneyTwo extends DynamicGraphic
     
     
     //this.smooth();
-    this.colorMode(HSB, 1);
-    this.strokeWeight(4);
+    colorMode(HSB, 1);
+    strokeWeight(4);
 
     //startTime = -(cycleLength*20) / (float) this.height;
     float timer = (millis() - startTime) % cycleLength;
@@ -87,12 +88,12 @@ public class DynamicWhitneyTwo extends DynamicGraphic
     {
 
       //    this.noFill();
-      this.noStroke();
+      noStroke();
     }
     else
     {
-      this.beginShape();
-      this.noFill();
+      beginShape();
+      noFill();
     }
     for (float i = 0; i < nbrPoints; ++i)
     {
@@ -142,7 +143,6 @@ public class DynamicWhitneyTwo extends DynamicGraphic
     {
       this.endShape();
     }
-    this.endDraw();
   }
 
   // end class DynamicWhitneyTwo

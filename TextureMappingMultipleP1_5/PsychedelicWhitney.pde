@@ -7,8 +7,6 @@ import java.nio.FloatBuffer;
 
 public class PsychedelicWhitney extends DynamicGraphic
 {
-
-
   private GLModel glmodel;
   private GLTexture tex;
 
@@ -46,8 +44,9 @@ public class PsychedelicWhitney extends DynamicGraphic
     sourceDynamic.put( NAME, this );
     sourceImages.put( NAME, this );
 
-    //app.registerDraw(this);
+    initialize();
   }
+
 
   void initialize()
   {     
@@ -97,7 +96,7 @@ public class PsychedelicWhitney extends DynamicGraphic
   //
   // do the actual drawing (off-screen)
   //
-  void pre()
+  void drawGraphic()
   {
 
     this.glmodel.beginUpdateVertices();
@@ -139,7 +138,7 @@ public class PsychedelicWhitney extends DynamicGraphic
 
     periods += varSpeed;
 
-    this.beginDraw();
+
 
     //    this.fill(255);
     //    this.noStroke();
@@ -181,8 +180,6 @@ public class PsychedelicWhitney extends DynamicGraphic
     this.endGL();
 
     // strategy2();
-
-    this.endDraw();
   }
 
 

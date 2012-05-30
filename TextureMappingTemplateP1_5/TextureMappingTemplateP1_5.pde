@@ -79,7 +79,7 @@ boolean deleteShape = false;
 
 boolean rendering = false;
 
-int displayMode = SHOW_MAPPED;  
+int displayMode = SHOW_SOURCE;  
 
 final float distance = 15;
 final float distanceSquared = distance*distance;  // in pixels, for selecting verts
@@ -99,23 +99,23 @@ ArrayList<DrawableNode> loadedImagesNodes;
 /*
 void init() {
  
-  // trick to make it possible to change the frame properties
-  frame.removeNotify(); 
+ // trick to make it possible to change the frame properties
+ frame.removeNotify(); 
  
-  // comment this out to turn OS chrome back on
-  frame.setUndecorated(true); 
+ // comment this out to turn OS chrome back on
+ frame.setUndecorated(true); 
  
-  // comment this out to not have the window "float"
-  frame.setAlwaysOnTop(true); 
+ // comment this out to not have the window "float"
+ frame.setAlwaysOnTop(true); 
  
-//  frame.setResizable(true);  
-  frame.addNotify(); 
+ //  frame.setResizable(true);  
+ frame.addNotify(); 
  
-  // making sure to call PApplet.init() so that things 
-  // get  properly set up.
-  super.init();
-}
-*/
+ // making sure to call PApplet.init() so that things 
+ // get  properly set up.
+ super.init();
+ }
+ */
 
 // 
 // setup
@@ -131,7 +131,9 @@ void setup()
   // uncomment this for 2nd monitor viewing
   // frame.setLocation(screenWidth,0);
 
-  setupGLGlow();
+
+  // this sets up a post-rendering glow effect. See the GLGLowStuff.pde tab and draw() for more details.
+  // setupGLGlow();
 
   // set up controlP5 gui
   initGUI();
@@ -144,14 +146,6 @@ void setup()
     pgl.endGL();
   }
 
-  blankImage = createImage(32, 32, RGB);
-  blankImage.loadPixels();
-  for (int x = 0; x < blankImage.width; x++)
-    for (int y = 0; y < blankImage.width; y++) {
-      blankImage.pixels[y*blankImage.width+x] = ( (x % (blankImage.width/4)) == 0 || (y % (blankImage.width/4)) == 0) ? 
-      color(0) : color(255) ;
-    }
-  blankImage.updatePixels();
 
   mappedView = new GLGraphicsOffScreen(this, width, height, true, 4);  
 
@@ -192,8 +186,15 @@ void setup()
   imageFiles = new HashMap<PImage, String>();
   movieFiles = new HashMap<Movie, String>();
 
-  // load my image as a test
-  // PImage sourceImage = loadImageIfNecessary("7sac9xt9.bmp");
+
+  blankImage = createImage(32, 32, RGB);
+  blankImage.loadPixels();
+  for (int x = 0; x < blankImage.width; x++)
+    for (int y = 0; y < blankImage.width; y++) {
+      blankImage.pixels[y*blankImage.width+x] = ( (x % (blankImage.width/4)) == 0 || (y % (blankImage.width/4)) == 0) ? 
+      color(0) : color(255) ;
+    }
+  blankImage.updatePixels();
 
   sourceImages.put("blank", blankImage);
 
@@ -212,8 +213,9 @@ void setup()
 
   hint(DISABLE_DEPTH_TEST);
 
-  // finally, read in XML config
-  readConfigXML();
+
+  // finally, read in XML config automagically - this is good for standalone apps  
+  // readConfigXML();
 }
 
 
@@ -221,8 +223,7 @@ void setup()
 
 void resetAllData()
 {
-  currentImage = null;
-  
+  currentShape = null;
   // clear all shape refs
   for (ProjectedShape projShape : shapes)
   {
@@ -231,7 +232,7 @@ void resetAllData()
   shapes.clear();
   sourceImages.clear();
 
-  shapes = new LinkedList<ProjectedShape>();
+  //shapes = new LinkedList<ProjectedShape>();
 
   // TODO: better way to unload these?
   sourceImages = new HashMap<String, PImage>(); 
@@ -246,6 +247,9 @@ void resetAllData()
     PGraphics pg = sourceDynamic.get(k);
     sourceImages.put(k, pg);
   }
+
+  // add a default shape...
+  //addNewShape(blankImage);
 }
 
 
@@ -352,7 +356,7 @@ PImage loadImageIfNecessary(String location)
 void draw()
 {
   // for rendering
-//  incTime();
+  //  incTime();
 
   //
   // DEBUG
@@ -386,22 +390,22 @@ void draw()
     {
       node.draw();
     }
-    
+
     /*
     int numImages = sourceImages.size();
-    int imgsPerRow = 4;
-    int imgW = width/8; // (width/2) / 4)
-    int count = 0;
-
-    for (PImage srcimg : sourceImages.values())
-    {
-      if (srcimg instanceof GLGraphicsOffScreen)
-        srcimg = ((GLGraphicsOffScreen)srcimg).getTexture();
-
-      image(srcimg, (count % imgsPerRow)*imgW, floor(count/imgsPerRow)*imgW, imgW, imgW); 
-      ++count;
-    }
-    */
+     int imgsPerRow = 4;
+     int imgW = width/8; // (width/2) / 4)
+     int count = 0;
+     
+     for (PImage srcimg : sourceImages.values())
+     {
+     if (srcimg instanceof GLGraphicsOffScreen)
+     srcimg = ((GLGraphicsOffScreen)srcimg).getTexture();
+     
+     image(srcimg, (count % imgsPerRow)*imgW, floor(count/imgsPerRow)*imgW, imgW, imgW); 
+     ++count;
+     }
+     */
   }
   else
   {
@@ -418,14 +422,14 @@ void draw()
       //}
     }
 
-    if (displayMode == SHOW_SOURCE || displayMode == EDIT_MAPPED)
+    if (displayMode == SHOW_SOURCE || displayMode == EDIT_MAPPED && currentShape != null)
       shapeRenderer.drawDestShape(currentShape);
 
     shapeRenderer.endRender();
     // done with drawing mapped shapes
 
 
-    if (displayMode == SHOW_SOURCE)
+    if (displayMode == SHOW_SOURCE && currentShape != null)
     {
       // start drawing source shapes
       shapeRenderer.beginRender(editingShapesView);
@@ -437,12 +441,16 @@ void draw()
 
 
       //
-      // post-render glow effect
+      // post-render effects could go here.
       //
-      doGLGlow(mappedView);
 
-      PImage mappedImage = (PImage)destTex;
-      // not mappedView.getTexture()
+      //doGLGlow(mappedView);
+
+      //     PImage mappedImage = (PImage)destTex;
+
+      // otherwise...
+
+      PImage mappedImage = mappedView.getTexture();
 
       noTint();
       image(editingShapesView.getTexture(), 0, 0);
@@ -455,10 +463,17 @@ void draw()
     // now draw for reals
     else
     {
-      doGLGlow(mappedView);
 
-      PImage mappedImage = (PImage)destTex;
-      // not mappedView.getTexture()
+      //
+      // post-render effects could go here.
+      //
+      // doGLGlow(mappedView);
+      // PImage mappedImage = (PImage)destTex;
+
+      // otherwise...
+
+
+      PImage mappedImage = mappedView.getTexture();
 
       image(mappedImage, 0, 0, width, height);
     }
@@ -504,7 +519,6 @@ void mousePressed()
   // first check if we're in the GUI
   if (!gui.window(this).isMouseOver())
   {
-
     hitSrcShape = false;  
 
     switch( displayMode )
@@ -604,14 +618,14 @@ void mousePressed()
 
     case SHOW_IMAGES:
 
-    for (DrawableNode node : loadedImagesNodes)
-    {
-      if (node.pointInside(mouseX,mouseY))
+      for (DrawableNode node : loadedImagesNodes)
       {
-        currentShape.srcImage = ((ImageNode)node).img;
+        if (node.pointInside(mouseX, mouseY))
+        {
+          currentShape.srcImage = ((ImageNode)node).img;
+        }
+        displayMode = SHOW_SOURCE;
       }
-      displayMode = SHOW_SOURCE;
-    }
 
 
       break;
@@ -711,17 +725,17 @@ void movieEvent(Movie movie) {
 
 /*
 // for rendering... to replace millis() with a standard time per frame
-// uncomment when rendering to disk
-int millis()
-{
-  return fakeTime;
-}
-
-void incTime()
-{
-  fakeTime += 25; // 33 ms/frame
-  //  println("ooot" + fakeTime);
-  if (rendering)
-    renderedFrames++;
-}
-*/
+ // uncomment when rendering to disk
+ int millis()
+ {
+ return fakeTime;
+ }
+ 
+ void incTime()
+ {
+ fakeTime += 25; // 33 ms/frame
+ //  println("ooot" + fakeTime);
+ if (rendering)
+ renderedFrames++;
+ }
+ */

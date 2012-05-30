@@ -31,6 +31,8 @@ public class DynamicWhitney extends DynamicGraphic
     // Or potentially check for other entries in the HashMap and save to a different name
     sourceDynamic.put( NAME, this );
     sourceImages.put( NAME, this );    
+    
+    initialize();
   }
 
   void initialize()
@@ -58,11 +60,9 @@ public class DynamicWhitney extends DynamicGraphic
   //
   // do the actual drawing (off-screen)
   //
-  void pre()
+  void drawGraphic()
   {
     float my = 20;
-
-    this.beginDraw();
     
     GL gl = this.beginGL();
     gl.glClearColor(0f,0f,0f,0f);
@@ -142,7 +142,6 @@ public class DynamicWhitney extends DynamicGraphic
     {
       this.endShape();
     }
-    this.endDraw();
   }
 
   // end class DynamicWhitney

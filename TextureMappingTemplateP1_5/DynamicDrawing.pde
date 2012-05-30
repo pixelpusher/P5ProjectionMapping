@@ -11,9 +11,6 @@ void setupDynamicImages()
   // Right now there is only the Whitney one
   // All we need to do is create it, and it does the rest! 
 
-  DynamicGraphic whitneyDynamicImage = new DynamicWhitney(this, 1024, 1024);
-  DynamicGraphic whitneyDynamicImage2 = new DynamicWhitneyTwo(this, 512, 512);
-  DynamicGraphic whitneyDynamicImage3 = new PsychedelicWhitney(this, 1024, 1024);
   DynamicGraphic bwDynamicImage = new DynamicBWGraphic(this, 256, 64);
 }
 
