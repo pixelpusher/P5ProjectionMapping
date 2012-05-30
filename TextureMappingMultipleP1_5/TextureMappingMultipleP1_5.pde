@@ -221,7 +221,7 @@ void setup()
 
 void resetAllData()
 {
-  currentImage = null;
+  currentShape = null;
   
   // clear all shape refs
   for (ProjectedShape projShape : shapes)
