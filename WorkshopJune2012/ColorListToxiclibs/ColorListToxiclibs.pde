@@ -31,7 +31,7 @@ import toxi.color.*;
 import toxi.util.datatypes.*;
 
 ColorList clist; //this will hold our list of colors
-
+int numberOfUniqueColors = 60; // these are all the sahdes of colours we will generate from a list
 
 
 void setup() 
@@ -52,8 +52,8 @@ void setup()
   // now add another random hue which is using only bright shades
   t.addRange(ColorRange.BRIGHT, TColor.newRandom(), random(0.02, 0.05));
 
-  // use the TColortheme to create a list of 160 colors
-  clist = t.getColors(24);
+  // use the TColortheme to create a list of colors
+  clist = t.getColors( numberOfUniqueColors );
 
   
   frameRate(3); // set the framerate to something slow
