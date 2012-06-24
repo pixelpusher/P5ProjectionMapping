@@ -30,7 +30,7 @@ void setup()
   grad.addColorAt(numberOfShades-1, TColor.BLACK); // back to black
   
   // now, convert the gradient into a simple list of colors:
-  clis t= grad.calcGradient(0, numberOfShades);
+  clist = grad.calcGradient(0, numberOfShades);
 }
 
 

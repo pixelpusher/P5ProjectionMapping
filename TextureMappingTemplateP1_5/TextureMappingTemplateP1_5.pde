@@ -8,8 +8,10 @@
  * 
  * keys:
  *
+ *  ALT+h toggles turning the GUI on/off (for loading files and movies)
  *  a: add a new shape
  *  x: delete current shape
+ *  ;: change shape's texture (image) to next one in list
  *  <: prev shape
  *  >: next shape
  *  d: delete currently selected shape vertex
