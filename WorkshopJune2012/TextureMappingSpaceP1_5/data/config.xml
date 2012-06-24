@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config updated="2012.6.5-18:47:25" version="1.0">
+  <shapes>
+    <shape media="bwgraphic" mediaPath="bwgraphic" mediaType="other" name="shape1.37640141E9">
+      <vertices count="4">
+        <vertex dx="0.0" dy="163.0" sx="52.0" sy="2.0"/>
+        <vertex dx="247.0" dy="164.0" sx="96.0" sy="6.0"/>
+        <vertex dx="248.0" dy="267.0" sx="98.0" sy="32.0"/>
+        <vertex dx="1.0" dy="269.0" sx="56.0" sy="30.0"/>
+      </vertices>
+    </shape>
+    <shape media="bwgraphic" mediaPath="bwgraphic" mediaType="other" name="shape1.6284055E9">
+      <vertices count="4">
+        <vertex dx="406.0" dy="125.0" sx="210.0" sy="40.0"/>
+        <vertex dx="544.0" dy="125.0" sx="252.0" sy="40.0"/>
+        <vertex dx="541.0" dy="261.0" sx="256.0" sy="64.0"/>
+        <vertex dx="401.0" dy="260.0" sx="212.0" sy="62.0"/>
+      </vertices>
+    </shape>
+    <shape media="bwgraphic" mediaPath="bwgraphic" mediaType="other" name="shape5.5065792E8">
+      <vertices count="4">
+        <vertex dx="577.0" dy="64.0" sx="0.0" sy="0.0"/>
+        <vertex dx="852.0" dy="58.0" sx="256.0" sy="0.0"/>
+        <vertex dx="862.0" dy="268.0" sx="256.0" sy="64.0"/>
+        <vertex dx="568.0" dy="269.0" sx="0.0" sy="64.0"/>
+      </vertices>
+    </shape>
+    <shape media="" mediaPath="" mediaType="image" name="shape1.03786739E9">
+      <vertices count="4">
+        <vertex dx="10.0" dy="420.0" sx="0.0" sy="0.0"/>
+        <vertex dx="267.0" dy="429.0" sx="32.0" sy="0.0"/>
+        <vertex dx="266.0" dy="501.0" sx="32.0" sy="32.0"/>
+        <vertex dx="7.0" dy="506.0" sx="0.0" sy="32.0"/>
+      </vertices>
+    </shape>
+    <shape media="bwgraphic" mediaPath="bwgraphic" mediaType="other" name="shape6.6014579E8">
+      <vertices count="8">
+        <vertex dx="315.0" dy="297.0" sx="246.0" sy="40.0"/>
+        <vertex dx="335.0" dy="298.0" sx="252.0" sy="50.0"/>
+        <vertex dx="336.0" dy="517.0" sx="252.0" sy="64.0"/>
+        <vertex dx="868.0" dy="516.0" sx="228.0" sy="64.0"/>
+        <vertex dx="868.0" dy="534.0" sx="208.0" sy="64.0"/>
+        <vertex dx="0.0" dy="542.0" sx="208.0" sy="52.0"/>
+        <vertex dx="2.0" dy="517.0" sx="208.0" sy="40.0"/>
+        <vertex dx="316.0" dy="516.0" sx="226.0" sy="40.0"/>
+      </vertices>
+    </shape>
+    <shape media="bwgraphic" mediaPath="bwgraphic" mediaType="other" name="shape1.77710579E9">
+      <vertices count="4">
+        <vertex dx="615.0" dy="425.0" sx="0.0" sy="0.0"/>
+        <vertex dx="647.0" dy="425.0" sx="32.0" sy="0.0"/>
+        <vertex dx="648.0" dy="506.0" sx="32.0" sy="32.0"/>
+        <vertex dx="616.0" dy="504.0" sx="0.0" sy="32.0"/>
+      </vertices>
+    </shape>
+    <shape media="bwgraphic" mediaPath="bwgraphic" mediaType="other" name="shape5.4094234E8">
+      <vertices count="6">
+        <vertex dx="586.0" dy="368.0" sx="110.0" sy="52.0"/>
+        <vertex dx="643.0" dy="368.0" sx="108.0" sy="36.0"/>
+        <vertex dx="648.0" dy="425.0" sx="148.0" sy="40.0"/>
+        <vertex dx="614.0" dy="425.0" sx="148.0" sy="56.0"/>
+        <vertex dx="613.0" dy="510.0" sx="134.0" sy="64.0"/>
+        <vertex dx="587.0" dy="509.0" sx="108.0" sy="62.0"/>
+      </vertices>
+    </shape>
+    <shape media="bwgraphic" mediaPath="bwgraphic" mediaType="other" name="shape1.7258249E9">
+      <vertices count="4">
+        <vertex dx="340.0" dy="365.0" sx="0.0" sy="0.0"/>
+        <vertex dx="567.0" dy="366.0" sx="256.0" sy="0.0"/>
+        <vertex dx="568.0" dy="515.0" sx="256.0" sy="64.0"/>
+        <vertex dx="340.0" dy="509.0" sx="0.0" sy="64.0"/>
+      </vertices>
+    </shape>
+  </shapes>
+</config>
