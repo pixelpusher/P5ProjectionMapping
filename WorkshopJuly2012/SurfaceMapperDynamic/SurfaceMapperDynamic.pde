@@ -1,3 +1,16 @@
+/*
+ * Example of using the SurfaceMapper library for Processing
+ * to create projection-mapped sketches of images, movies, and dynamic graphics.
+ *
+ * By PixelPusher / Evan Raskob, 2012 <evan@openlabworkshops.org>
+ *   for a Projection-mapping workshop by 
+ *   Openlab Workshops <http://openlabworkshops.org> and
+ *   Codasign <http://codasign.com> 
+ *
+ * Licensed under a BSD license. No warrantee provided.
+ *
+ */
+
 import codeanticode.gsvideo.*;
 import ixagon.SurfaceMapper.*;
 import processing.opengl.*;
@@ -13,6 +26,10 @@ GSMovie movie;
 // dynamic drawings
 DynamicGraphic bwDynamicImage;
 
+// possible names for surfaces
+final String SurfaceNames[] = { 
+  "bars", "movie", "kitten"
+}; 
 
 
 void setup()
