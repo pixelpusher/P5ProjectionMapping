@@ -101,9 +101,9 @@ void createConfigXML()
       }
 
 
-      else if (ps.srcImage instanceof Movie)
+      else if (ps.srcImage instanceof GSMovie)
       {
-        String moviePath = movieFiles.get((Movie)ps.srcImage);
+        String moviePath = movieFiles.get((GSMovie)ps.srcImage);
 
         // same method we use when loading it...
         File f = new File(moviePath);
@@ -219,7 +219,7 @@ boolean readConfigXML()
         if (mediaPath != "")
         {
           // load Movie
-          Movie movie = new Movie(this, mediaPath);
+          GSMovie movie = new GSMovie(this, mediaPath);
 
           File f = new File(mediaPath);
           String pathEnd = f.getName();
@@ -241,7 +241,8 @@ boolean readConfigXML()
           newShape = addNewShape(movie);
 
           // finally, add to keyed array for this shape
-          sourceMovies.put(newShape, movie);
+          sourceMovies.put(newPath, movie);
+          movie.loop();
         }
         else
         {

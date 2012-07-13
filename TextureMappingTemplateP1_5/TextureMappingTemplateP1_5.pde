@@ -1,3 +1,4 @@
+
 /*
  * First go at Projection mapping in Processing
  * Uses a list of projection-mapped shapes.
@@ -45,6 +46,7 @@ import controlP5.*;
 import processing.opengl.*;
 import javax.media.opengl.*;
 import codeanticode.glgraphics.*;
+import codeanticode.gsvideo.*;
 
 
 LinkedList<ProjectedShape> shapes = null; // Here are all the ProjectedShapes that comtain the geometry for mapping images onto them
@@ -58,11 +60,11 @@ float maxDistToVert = 10;  //max distance between mouse and a vertex for moving
 ProjectedShape currentShape = null;
 
 HashMap<String, PImage> sourceImages;  // list of all available images for mapping, keyed by file name
-HashMap<ProjectedShape, Movie> sourceMovies;  // list of movies, keyed by associated ProjectedShape object that is using them
+HashMap<String, GSMovie> sourceMovies;  // list of movies, keyed by file name
 HashMap<String, DynamicGraphic> sourceDynamic;  // list of dynamic images (subclass of PGraphics), keyed by name
 
 HashMap<PImage, String> imageFiles;
-HashMap<Movie, String> movieFiles;
+HashMap<GSMovie, String> movieFiles;
 
 PImage blankImage;  // default checkered image for shapes
 
@@ -182,11 +184,11 @@ void setup()
 
   shapes = new LinkedList<ProjectedShape>();
   sourceImages = new HashMap<String, PImage>(); 
-  //sourceMovies = new HashMap<ProjectedShape,Movie>();
+  sourceMovies = new HashMap<String, GSMovie>();
   sourceDynamic = new HashMap<String, DynamicGraphic>();
 
   imageFiles = new HashMap<PImage, String>();
-  movieFiles = new HashMap<Movie, String>();
+  movieFiles = new HashMap<GSMovie, String>();
 
 
   blankImage = createImage(32, 32, RGB);
@@ -238,7 +240,7 @@ void resetAllData()
 
   // TODO: better way to unload these?
   sourceImages = new HashMap<String, PImage>(); 
-  sourceMovies = new HashMap<ProjectedShape, Movie>();
+  sourceMovies = new HashMap<String, GSMovie>();
 
   // probably don't want to reset dynamic images because there is no way to recreate them!
   //sourceDynamic = new HashMap<String, PGraphics>();
@@ -341,14 +343,58 @@ PImage loadImageIfNecessary(String location)
     float imgx =  (imgIndex % imgsPerRow)*imgW;
     float imgy =  (imgIndex/imgsPerRow)*imgW; 
 
+    // map image to file location
+    imageFiles.put(loadedImage, location);
+
     loadedImagesNodes.add( new ImageNode(loadedImage, imgx, imgy, imgW, imgW ) );
   }
-
-  // map image to file location
-  imageFiles.put(loadedImage, location);
-
+  
   return loadedImage;
 }
+
+
+GSMovie loadMovieIfNecessary(String location)
+{
+  String _location = "";
+
+  File f = new File(location);
+  _location = f.getName();
+
+  GSMovie loadedMovie = null;
+
+  if ( sourceMovies.containsKey( _location ) )
+  {
+    loadedMovie = sourceMovies.get( _location );
+  }
+  else
+  {
+    loadedMovie = new GSMovie( this, location );
+    sourceMovies.put( _location, loadedMovie );
+    sourceImages.put( _location, loadedMovie );
+    
+    DropdownList dl = (DropdownList)gui.getGroup("AvailableMovies");
+    dl.addItem(_location, sourceMovies.size());
+
+    /// add new image button
+
+    int numImages = sourceMovies.size();
+    int imgsPerRow = 4;
+    int imgW = width/8; // (width/2) / 4)
+    int imgIndex = loadedImagesNodes.size();
+
+    float imgx =  (imgIndex % imgsPerRow)*imgW;
+    float imgy =  (imgIndex/imgsPerRow)*imgW; 
+
+    loadedImagesNodes.add( new ImageNode(loadedMovie, imgx, imgy, imgW, imgW ) );
+
+    // map image to file location
+    movieFiles.put(loadedMovie, location);
+    loadedMovie.loop();
+  }
+
+  return loadedMovie;
+}
+
 
 
 // 
@@ -721,7 +767,7 @@ void mouseDragged()
 
 
 
-void movieEvent(Movie movie) {
+void movieEvent(GSMovie movie) {
   movie.read();
 }
 

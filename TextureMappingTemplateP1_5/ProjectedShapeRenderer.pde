@@ -194,6 +194,7 @@ class ProjectedShapeRenderer
     renderTarget.smooth();
     renderTarget.strokeWeight(2);
     renderTarget.noFill();
+    renderTarget.colorMode(RGB);
     renderTarget.stroke(projShape.srcColor);
     // draw the shape using source and destination vertices
     if (projShape.verts != null && projShape.verts.size() > 0)
@@ -279,6 +280,7 @@ class ProjectedShapeRenderer
     {
       this.screenBlend(projShape.blendMode, (PGraphicsOpenGL)renderTarget);
       //renderTarget.noTint();
+      renderTarget.colorMode(RGB);
       renderTarget.tint(projShape.dstColor);
       renderTarget.noStroke();
       renderTarget.noSmooth();

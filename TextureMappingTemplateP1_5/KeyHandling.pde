@@ -20,20 +20,20 @@ void keyReleased()
   else if (key=='a')
   {
     //addNewShape(loadImageIfNecessary("7sac9xt9.bmp"));
-    
+
     // this is kind of a pain in the ass...
-    
+
     Iterator<String> imgNamesIter = sourceImages.keySet().iterator();
-    
+
     if (imgNamesIter.hasNext())
     {
       String imgName = imgNamesIter.next();
       PImage img = sourceImages.get(imgName);
-      addNewShape( img ); 
+      addNewShape( img );
     }
-    
+
     //currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.srcColor = color(255,255);
+    currentShape.srcColor = color(255, 255);
     currentShape.dstColor = currentShape.srcColor;
     currentShape.blendMode = ADD;
   }
@@ -89,7 +89,7 @@ void keyReleased()
     currentShape = newShape;
 
     //currentShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
-    currentShape.srcColor = color(255,255);    
+    currentShape.srcColor = color(255, 255);    
     currentShape.dstColor = currentShape.srcColor;
     shapes.add(currentShape);
   }
@@ -103,7 +103,7 @@ void keyReleased()
   else if (key == '.')
   {
     showFPS = !showFPS;
-    
+
     // advance 1 image
     /*
     if (currentShape != null)
@@ -125,20 +125,20 @@ void keyReleased()
   else if (key == 'i' && currentShape != null)
   {
     currentShape.clearVerts();
-    currentShape.addVert(0,0, 0,0);
-    currentShape.addVert(currentShape.srcImage.width,0, currentShape.srcImage.width,0);
-    currentShape.addVert(currentShape.srcImage.width,currentShape.srcImage.height, currentShape.srcImage.width,currentShape.srcImage.height);
-    currentShape.addVert(0,currentShape.srcImage.height, 0,currentShape.srcImage.height);
+    currentShape.addVert(0, 0, 0, 0);
+    currentShape.addVert(currentShape.srcImage.width, 0, currentShape.srcImage.width, 0);
+    currentShape.addVert(currentShape.srcImage.width, currentShape.srcImage.height, currentShape.srcImage.width, currentShape.srcImage.height);
+    currentShape.addVert(0, currentShape.srcImage.height, 0, currentShape.srcImage.height);
   }
   else if (key == 'I' && currentShape != null)
   {
     currentShape.clearVerts();
-    currentShape.addVert(0,0, 0,0);
-    currentShape.addVert(currentShape.srcImage.width,0, mappedView.width,0);
-    currentShape.addVert(currentShape.srcImage.width,currentShape.srcImage.height, mappedView.width,mappedView.height);
-    currentShape.addVert(0,currentShape.srcImage.height, 0,mappedView.height);
+    currentShape.addVert(0, 0, 0, 0);
+    currentShape.addVert(currentShape.srcImage.width, 0, mappedView.width, 0);
+    currentShape.addVert(currentShape.srcImage.width, currentShape.srcImage.height, mappedView.width, mappedView.height);
+    currentShape.addVert(0, currentShape.srcImage.height, 0, mappedView.height);
   }
-  
+
   else if (key == 'x' && currentShape != null)
   {
     deleteShape = true;
@@ -153,11 +153,11 @@ void keyReleased()
     currentShape.clearVerts();
     currentVert = null;
   }
-  
-//  else if (key == 'i') 
-//  {
-//    drawImage = !drawImage;
-//  }  
+
+  //  else if (key == 'i') 
+  //  {
+  //    drawImage = !drawImage;
+  //  }  
   else if (key == 'm') 
   {
     ++displayMode;
@@ -176,18 +176,19 @@ void keyReleased()
   {
     Iterator<String> imgNamesIter = sourceImages.keySet().iterator();
     boolean looping = true;
-    
-    while (looping && imgNamesIter.hasNext())
+
+    while (looping && imgNamesIter.hasNext ())
     {
       String imgName = imgNamesIter.next();
-      println("found image:" + imgName);
       PImage img = sourceImages.get(imgName);
       if (currentShape.srcImage == img)
       {
-        println("found it!");
+        //println("found it!");
         if (imgNamesIter.hasNext())
         {
-          currentShape.srcImage = sourceImages.get( imgNamesIter.next() );
+          String nextImg = imgNamesIter.next();
+          println("next image:" + nextImg);
+          currentShape.srcImage = sourceImages.get( nextImg  );
         }
         else
         {
@@ -219,5 +220,4 @@ void keyReleased()
     loadXMLFile();
   }
 }
-
 

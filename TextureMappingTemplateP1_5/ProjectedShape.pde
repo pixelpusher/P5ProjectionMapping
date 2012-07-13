@@ -19,8 +19,8 @@ class ProjectedShape
   int blendMode = LIGHTEST;
 
   // for outlining:
-  color srcColor = color(0, 255, 0, 180);
-  color dstColor = color(255, 0, 255, 180);
+  color srcColor;
+  color dstColor;
   
   String name;
   
@@ -28,6 +28,9 @@ class ProjectedShape
 
   ProjectedShape(PImage img)
   {
+    srcColor = color(255);
+    dstColor = color(255);
+  
     if (img != null)
       srcImage = img;
     else
